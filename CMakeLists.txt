@@ -1,0 +1,7 @@
+cmake_minimum_required(VERSION 3.14)
+project(configurable_dedup)
+include_directories(./include)
+aux_source_directory(./src DIR_SRCS)
+set(CMAKE_CXX_STANDARD 11)
+add_executable(configurable_dedup ${DIR_SRCS} main.cpp include/trace_reader.h src/trace_reader.cc include/global.h src/global.cpp include/configurable_dedup.h src/configurable_dedup.cpp include/index_table.h src/index_table.cpp src/sample_handler.cpp)
+target_link_libraries(configurable_dedup)

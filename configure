@@ -1,0 +1,27 @@
+only_recipe false
+only_cnr false
+
+#unit subset/cache
+cache_size 64
+
+#unit KB/chunk
+chunk_size 4
+
+#unit chunks/container
+container_size 256
+
+#unit chunks/window
+window_size 2048
+
+#unit subset
+IO_cap 6
+
+#sample ratio
+bit_num1 5
+bit_num2 6
+
+#segment ratio
+segmenting_bit_num 8
+
+dedup_trace_dir ./trace/
+trace_summary_file summary.txt
