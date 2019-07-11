@@ -54,17 +54,28 @@ cout<<endl;
 void hook_table::InsertRecipeFeatures(const list<chunk>& cks) {
     for(auto n:cks){
         hook_entry* entry;
-        LookUp(n.ID(),&entry);
-        entry->candidates_.push_back(recipes_[n.RecipeName()].Meta());
+        if (LookUp(n.ID(),&entry)) {
+            entry->candidates_.push_back(recipes_[n.RecipeName()].Meta());
+        } else {
+            hook_entry tmp_entry;
+            tmp_entry.ck_ = n;
+            tmp_entry.candidates_.push_back(recipes_[n.RecipeName()].Meta());
+            map_.emplace(n.ID(),tmp_entry);
+        }
     }
 }
 
 void hook_table::InsertCnrFeatures(const list<chunk> &cks) {
     for(auto n:cks){
-        hook_entry entry;
-        entry.ck_=n;
-        entry.candidates_.push_back(containers_[n.CnrName()].Meta());
-        map_.emplace(n.ID(),entry);
+        hook_entry* entry;
+        if (LookUp(n.ID(),&entry)) {
+            entry->candidates_.push_back(containers_[n.CnrName()].Meta());
+        } else {
+            hook_entry tmp_entry;
+            tmp_entry.ck_ = n;
+            tmp_entry.candidates_.push_back(containers_[n.CnrName()].Meta());
+            map_.emplace(n.ID(),tmp_entry);
+        }
     }
 }
 void hook_table::EraseHookTable(chunk ck) {}

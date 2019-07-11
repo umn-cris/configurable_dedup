@@ -31,11 +31,11 @@ public:
         return false;
     }
     long inline CnrScore(){
-        return sequence_number_+5*(pow(2,10-g_bit_num1)+pow(2,10-g_bit_num2));
+        return 1;
     }
 
     long inline RecipeScore(long feature_number){
-        return sequence_number_+5*feature_number;
+        return feature_number;
     }
 
 };

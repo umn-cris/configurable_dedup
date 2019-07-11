@@ -101,6 +101,7 @@ void configurable_dedup::DoDedup(){
             CDSegmenting(window_,current_recipe,segments_);
             list<chunk> recipe_features;
             list<chunk> cnr_features;
+            list<chunk> recipe_hooks;
 
             for(auto n:*segments_){
                 long feature_number=0;
@@ -108,10 +109,11 @@ void configurable_dedup::DoDedup(){
                     /*1. pick hook*/
                     while (m!=n.chunks_.end()){
                         if(IfFeature(*m)){
+                            m->Cnr_or_Recipe(false);
+                            recipe_hooks.push_back(*m);
+                            feature_number++;
                             if(hooks_.LookUp(*m)){
-                                m->Cnr_or_Recipe(false);
                                 recipe_features.push_back(*m);
-                                feature_number++;
                                 hook_hit++;
                             }
                         }
@@ -155,7 +157,7 @@ void configurable_dedup::DoDedup(){
 
 
             /*4. update hooktable*/
-                hooks_.InsertRecipeFeatures(recipe_features);
+                hooks_.InsertRecipeFeatures(recipe_hooks);
                 hooks_.InsertCnrFeatures(cnr_features);
 
         }
