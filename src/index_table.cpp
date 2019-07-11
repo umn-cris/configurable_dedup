@@ -3,6 +3,7 @@
 //
 
 #include <subset.h>
+#include <unordered_map>
 #include "index_table.h"
 
 
@@ -12,21 +13,39 @@ extern vector<recipe> recipes_;
 list<meta_data> hook_table::PickCandidates(const list<chunk>& features) {
     list<meta_data> candidates;
     list<meta_data> tmp_candidates;
+    unordered_map<long, long> recipe_cds;
+    unordered_map<long, long> cnr_cds;
 
     for( auto n:features){
         tmp_candidates = LookUp(n.ID());
-        candidates.merge(tmp_candidates);
+        for (auto it:tmp_candidates) {
+          if (it.IfCnr()) {
+            cnr_cds[it.Name()]++;
+          } else {
+            recipe_cds[it.Name()]++;
+          }
+        }    
     }
+    list<meta_data> recipe_cds_list;
+    list<meta_data> cnr_cds_list;
+    for (auto it:recipe_cds) {
+      recipe_cds_list.push_back(recipes_[it.first].Meta());
+      recipe_cds_list.back().SetScore(it.second);
+    }
+    for (auto it:cnr_cds) {
+      cnr_cds_list.push_back(containers_[it.first].Meta());
+      cnr_cds_list.back().SetScore(it.second);
+    }
+    candidates.merge(recipe_cds_list);
+    candidates.merge(cnr_cds_list);
 
     auto comp = [](meta_data s1, meta_data s2){
         return s1.Score()>s2.Score();
     };
-    candidates.sort(); // sort candidates according to their name
-    candidates.unique(); // remove deduplicate candidates
     candidates.sort(comp); // sort candidates according to their score
 
-    for(auto n:candidates)cout<<n.IfCnr()<<" "<<n.Score() << endl;
-cout<<endl;
+//    for(auto n:candidates)cout<<n.IfCnr()<<" "<<n.Score() << endl;
+//cout<<endl;
     if(g_only_cnr){
         for(list<meta_data>::iterator it=candidates.begin();it!=candidates.end();){
             if(!it->IfCnr())  it = candidates.erase(it);
