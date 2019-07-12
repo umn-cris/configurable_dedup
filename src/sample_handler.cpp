@@ -36,3 +36,12 @@ bool sample_handler::PositiveFeatures(const chunk& ck, long bit_num) {
     if(is_hook) return true;
     else return false;
 }
+
+bool sample_handler::RandomPickFeature(const chunk &ck, long sample_ratio) {
+    if(sample_gap_>=sample_ratio){
+        sample_gap_=0;
+        return true;
+    }
+    sample_gap_++;
+    return false;
+}

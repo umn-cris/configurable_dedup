@@ -101,30 +101,33 @@ void configurable_dedup::DoDedup(){
             CDSegmenting(window_,current_recipe,segments_);
             list<chunk> recipe_features;
             list<chunk> cnr_features;
-            list<chunk> recipe_hooks;
+            list<chunk> hitted_hooks;
 
             for(auto n:*segments_){
-                long feature_number=0;
                 list<chunk>::iterator m = n.chunks_.begin();
                     /*1. pick hook*/
                     while (m!=n.chunks_.end()){
-                        if(IfFeature(*m)){
-                            m->Cnr_or_Recipe(false);
-                            recipe_hooks.push_back(*m);
-                            feature_number++;
+                        if(g_only_cnr){
                             if(hooks_.LookUp(*m)){
-                                recipe_features.push_back(*m);
+                                hitted_hooks.push_back(*m);
                                 hook_hit++;
                             }
+                        } else {
+                            if(IfFeature(*m) && hooks_.LookUp(*m)){
+                                    hitted_hooks.push_back(*m);
+                                    hook_hit++;
+                                }
+
                         }
                         m++;
                     }
-                recipes_[n.Name()].SetScore(RecipeScore(feature_number));
             }
             /*2 according to recipe_features which hit the hook table, load champion subsets to lru_cache.
              * although only features belong to recipe that hit the hook table, those loaded subsets including both cnr and recipe
              * in here, old features(hit hook table) are recipe features while new features (not contained in hook table) are cnr features*/
-            Load2cache(recipe_features);
+
+                Load2cache(hitted_hooks);
+
 
             /*3. dedup via lru_cache*/
 
@@ -145,8 +148,14 @@ void configurable_dedup::DoDedup(){
                             current_cnr->AppendChunk(*m);
                         }
                         if(IfFeature(*m)){
-                            m->Cnr_or_Recipe(true);
-                            cnr_features.push_back(*m);
+                            if(!g_only_recipe){
+                                m->Cnr_or_Recipe(true);
+                                cnr_features.push_back(*m);
+                            }
+                            if(!g_only_cnr){
+                                m->Cnr_or_Recipe(false);
+                                recipe_features.push_back(*m);
+                            }
                         }
                         //cout<<"miss "<<m->ID()<<" "<<m->RecipeName()<<" "<<m->CnrName()<<endl;
                     }
@@ -157,7 +166,7 @@ void configurable_dedup::DoDedup(){
 
 
             /*4. update hooktable*/
-                hooks_.InsertRecipeFeatures(recipe_hooks);
+                hooks_.InsertRecipeFeatures(recipe_features);
                 hooks_.InsertCnrFeatures(cnr_features);
 
         }

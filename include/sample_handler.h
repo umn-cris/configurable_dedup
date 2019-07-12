@@ -6,8 +6,10 @@
 #define DEDUP_REWRITE_SAMPLE_HANDLER_H
 class sample_handler{
 public:
+    long sample_gap_=0;
     bool PositiveFeatures(const chunk& ck, long bit_num);
     bool NegativeFeatures(const chunk& ck, long bit_num);
+    bool RandomPickFeature(const chunk& ck, long sample_ratio);
 };
 
 

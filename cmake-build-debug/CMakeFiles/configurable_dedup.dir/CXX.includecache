@@ -74,13 +74,7 @@ global.h
 subset.h
 .././include/subset.h
 
-/home/wyx/CLionProjects/configurable_dedup/main.cpp
-global.h
-/home/wyx/CLionProjects/configurable_dedup/global.h
+/home/wyx/dedup/configurable_dedup/src/configurable_dedup.cpp
 configurable_dedup.h
-/home/wyx/CLionProjects/configurable_dedup/configurable_dedup.h
-
-/home/wyx/CLionProjects/configurable_dedup/src/configurable_dedup.cpp
-configurable_dedup.h
-/home/wyx/CLionProjects/configurable_dedup/src/configurable_dedup.h
+/home/wyx/dedup/configurable_dedup/src/configurable_dedup.h
 

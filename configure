@@ -1,5 +1,5 @@
 only_recipe false
-only_cnr false
+only_cnr true
 
 #unit subset/cache
 cache_size 64
@@ -14,11 +14,12 @@ container_size 256
 window_size 2048
 
 #unit subset
-IO_cap 6
+IO_cap 64
 
 #sample ratio
-bit_num1 5
+bit_num1 6
 bit_num2 6
+random_pick_ratio 64
 
 #segment ratio
 segmenting_bit_num 8

@@ -8,7 +8,7 @@ CMakeFiles/configurable_dedup.dir/main.cpp.o
  .././include/sample_handler.h
  .././include/subset.h
  .././include/trace_reader.h
- /home/wyx/CLionProjects/configurable_dedup/main.cpp
+ /home/wyx/dedup/configurable_dedup/main.cpp
 CMakeFiles/configurable_dedup.dir/src/configurable_dedup.cpp.o
  .././include/configurable_dedup.h
  .././include/global.h
@@ -16,23 +16,23 @@ CMakeFiles/configurable_dedup.dir/src/configurable_dedup.cpp.o
  .././include/sample_handler.h
  .././include/subset.h
  .././include/trace_reader.h
- /home/wyx/CLionProjects/configurable_dedup/src/configurable_dedup.cpp
+ /home/wyx/dedup/configurable_dedup/src/configurable_dedup.cpp
 CMakeFiles/configurable_dedup.dir/src/global.cpp.o
  .././include/global.h
- /home/wyx/CLionProjects/configurable_dedup/src/global.cpp
+ /home/wyx/dedup/configurable_dedup/src/global.cpp
 CMakeFiles/configurable_dedup.dir/src/index_table.cpp.o
  .././include/global.h
  .././include/index_table.h
  .././include/sample_handler.h
  .././include/subset.h
- /home/wyx/CLionProjects/configurable_dedup/src/index_table.cpp
+ /home/wyx/dedup/configurable_dedup/src/index_table.cpp
 CMakeFiles/configurable_dedup.dir/src/sample_handler.cpp.o
  .././include/global.h
  .././include/sample_handler.h
  .././include/subset.h
- /home/wyx/CLionProjects/configurable_dedup/src/sample_handler.cpp
+ /home/wyx/dedup/configurable_dedup/src/sample_handler.cpp
 CMakeFiles/configurable_dedup.dir/src/trace_reader.cc.o
  .././include/global.h
  .././include/subset.h
  .././include/trace_reader.h
- /home/wyx/CLionProjects/configurable_dedup/src/trace_reader.cc
+ /home/wyx/dedup/configurable_dedup/src/trace_reader.cc

@@ -6,5 +6,5 @@ CXX_FLAGS = -g   -std=gnu++11
 
 CXX_DEFINES = 
 
-CXX_INCLUDES = -I/home/wyx/CLionProjects/configurable_dedup/./include 
+CXX_INCLUDES = -I/home/wyx/dedup/configurable_dedup/./include 
 

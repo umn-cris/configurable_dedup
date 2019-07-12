@@ -15,6 +15,7 @@ string g_dedup_trace_dir;
 string g_trace_summary_file;
 long g_bit_num1=0;
 long g_bit_num2=0;
+long g_random_pick_ratio=0;
 long IOloads = 0;
 long cnr_IOloads=0;
 long recipe_IOloads=0;
@@ -63,6 +64,9 @@ int Parse(string cfgfile){
                 break;
             case hash_("bit_num2"):
                 g_bit_num2 = stol(value);
+                break;
+            case hash_("random_pick_ratio"):
+                g_random_pick_ratio = stol(value);
                 break;
             case hash_("segmenting_bit_num"):
                 g_segmenting_bit_num = stol(value);

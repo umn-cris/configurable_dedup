@@ -1,4 +1,4 @@
-# Install script for directory: /home/wyx/CLionProjects/configurable_dedup
+# Install script for directory: /home/wyx/dedup/configurable_dedup
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/wyx/CLionProjects/configurable_dedup/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/wyx/dedup/configurable_dedup/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

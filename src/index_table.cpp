@@ -44,8 +44,9 @@ list<meta_data> hook_table::PickCandidates(const list<chunk>& features) {
     };
     candidates.sort(comp); // sort candidates according to their score
 
-//    for(auto n:candidates)cout<<n.IfCnr()<<" "<<n.Score() << endl;
-//cout<<endl;
+/*    for(auto n:candidates)cout<<n.IfCnr()<<" "<<n.Score() << endl;
+    cout<<endl;*/
+
     if(g_only_cnr){
         for(list<meta_data>::iterator it=candidates.begin();it!=candidates.end();){
             if(!it->IfCnr())  it = candidates.erase(it);

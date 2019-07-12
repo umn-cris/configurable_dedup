@@ -25,6 +25,10 @@ public:
     bool IsBoundary(chunk ck);
     void Load2cache(const list<chunk>& features);
     bool IfFeature(const chunk& ck){
+        if(g_only_cnr){
+            return sampler_.RandomPickFeature(ck,g_random_pick_ratio);
+        }
+
         if(sampler_.PositiveFeatures(ck,g_bit_num1)) return true;
         if(sampler_.NegativeFeatures(ck,g_bit_num2)) return true;
 
