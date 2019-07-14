@@ -107,17 +107,9 @@ void configurable_dedup::DoDedup(){
                 list<chunk>::iterator m = n.chunks_.begin();
                     /*1. pick hook*/
                     while (m!=n.chunks_.end()){
-                        if(g_only_cnr){
-                            if(hooks_.LookUp(*m)){
-                                hitted_hooks.push_back(*m);
-                                hook_hit++;
-                            }
-                        } else {
-                            if(IfFeature(*m) && hooks_.LookUp(*m)){
-                                    hitted_hooks.push_back(*m);
-                                    hook_hit++;
-                                }
-
+                        if(hooks_.LookUp(*m)){
+                            hitted_hooks.push_back(*m);
+                            hook_hit++;
                         }
                         m++;
                     }
@@ -135,6 +127,10 @@ void configurable_dedup::DoDedup(){
                 list<chunk>::iterator m = n.chunks_.begin();
                 while(m!=n.chunks_.end()){
                     //cout<<m->ID()<<endl;
+                   if(IfFeature(*m) && !g_only_cnr) {
+                         m->Cnr_or_Recipe(false);
+                         recipe_features.push_back(*m);
+                   }
 
                     if(cache_.LookUp(*m)){
                         cache_hit++;
@@ -147,16 +143,10 @@ void configurable_dedup::DoDedup(){
                             Append2Containers(current_cnr);
                             current_cnr->AppendChunk(*m);
                         }
-                        if(IfFeature(*m)){
-                            if(!g_only_recipe){
-                                m->Cnr_or_Recipe(true);
-                                cnr_features.push_back(*m);
-                            }
-                            if(!g_only_cnr){
-                                m->Cnr_or_Recipe(false);
-                                recipe_features.push_back(*m);
-                            }
-                        }
+						if(IfFeature(*m) && !g_only_recipe) {
+								m->Cnr_or_Recipe(true);
+								cnr_features.push_back(*m);
+						}
                         //cout<<"miss "<<m->ID()<<" "<<m->RecipeName()<<" "<<m->CnrName()<<endl;
                     }
                     m++;
@@ -171,7 +161,7 @@ void configurable_dedup::DoDedup(){
 
         }
         //for(auto n:recipes_) cout<<n.Name()<<" "<<n.Score()<<" "<<n.SequenceNumber()<<endl;
-        //hooks_.PrintHookInfo();
+//        hooks_.PrintHookInfo();
 /*        {
             cout << "print cnr" << endl;
             for (auto m:containers_) cout << m.Name() << " " << m.SequenceNumber() << endl;
@@ -191,6 +181,5 @@ void configurable_dedup::DoDedup(){
         cout<<"current recipe_IO:"<<current_recipe_IOloads<<" overall recipe_IO:"<<recipe_IOloads<<endl;
         cout<<"current IOloads:"<<current_IOloads<<" overall IOloads:"<<IOloads<<endl;
         cout<<"current deduprate:"<<current_deduprate<<" overall deduprate:"<<overall_deduprate<<endl<<endl;
-
     }
 }
