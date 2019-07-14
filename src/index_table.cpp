@@ -102,12 +102,6 @@ void hook_table::EraseHookTable(chunk ck) {}
 
 
 
-
-
-
-
-
-
 void lru_cache::Load(const meta_data value) {
     // if target subset is already loaded into cache, make it as the first subset in the lru list.
     /*if(subsets_.find(value.Name())!=subsets_.end() && subsets_[value.Name()]->IfCnr() == value.IfCnr()){
