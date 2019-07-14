@@ -116,7 +116,7 @@ public:
         map_.erase(ck.ID());
     }
 
-    void Load(const meta_data value);
+    bool Load(const meta_data value);
     void Evict();
 };
 #endif //CONFIGURABLE_DEDUP_INDEX_TABLE_H

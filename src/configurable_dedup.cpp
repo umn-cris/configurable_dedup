@@ -31,8 +31,10 @@ void configurable_dedup::Load2cache(const list<chunk>& features) {
     //list<meta_data> candidates = hooks_.PickCandidates(features);
     list<meta_data> candidates = hooks_.PickCandidatesFIFO(features);
     if(candidates.empty()) return;
+    long cap=g_IO_cap;
     for(const auto n:candidates){
-        cache_.Load(n);
+        if(cache_.Load(n))cap--;
+        if(cap<=0)return;
     }
 }
 

@@ -131,12 +131,6 @@ list<meta_data> hook_table::PickCandidatesFIFO(const list<chunk>& features) {
         }
     }
 
-    if(candidates.size()>g_IO_cap){
-        for (long i = candidates.size(); i > g_IO_cap; --i) {
-            candidates.pop_back();
-        }
-    }
-
     return candidates;
 }
 
@@ -171,7 +165,7 @@ void hook_table::EraseHookTable(chunk ck) {}
 
 
 
-void lru_cache::Load(const meta_data value) {
+bool lru_cache::Load(const meta_data value) {
     // if target subset is already loaded into cache, make it as the first subset in the lru list.
     /*if(subsets_.find(value.Name())!=subsets_.end() && subsets_[value.Name()]->IfCnr() == value.IfCnr()){
         lru_cache_.remove(value);
@@ -182,7 +176,7 @@ void lru_cache::Load(const meta_data value) {
         if(n.Name() == value.Name() && n.IfCnr() == value.IfCnr()) {
             lru_cache_.remove(value);
             lru_cache_.push_front(value);
-            return;
+            return false;
         }
     }
 
@@ -200,6 +194,8 @@ void lru_cache::Load(const meta_data value) {
         InsertChunks(recipes_[value.Name()].chunks_, false);
         recipe_IOloads++;
     }
+    return true;
+
 }
 
 void lru_cache::Evict() {
