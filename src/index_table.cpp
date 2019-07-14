@@ -4,6 +4,7 @@
 
 #include <subset.h>
 #include <unordered_map>
+#include <utility>
 #include "index_table.h"
 
 
@@ -36,7 +37,35 @@ list<meta_data> hook_table::PickCandidates(const list<chunk>& features) {
       cnr_cds_list.push_back(containers_[it.first].Meta());
       cnr_cds_list.back().SetScore(it.second);
     }
-    candidates.merge(recipe_cds_list);
+
+	// special leveling algorithm
+	list<pair<long, list<meta_data>>> level_sort;
+	for (auto it:recipe_cds_list) {
+		auto i=level_sort.begin();
+		for (; i!=level_sort.end(); i++) {
+			if (it.SequenceNumber() >= i->second.front().SequenceNumber()-3 
+				 && it.SequenceNumber() <= i->second.front().SequenceNumber()+3) {
+				i->second.push_back(it);
+				i->first += it.Score();
+			 	break;
+			}
+		}
+		if (i == level_sort.end()) {
+			list<meta_data> tmp_list;
+			tmp_list.push_back(it);
+			level_sort.push_back(make_pair(it.Score(), tmp_list));
+		}
+	}
+
+	auto comp_level_sort = [](pair<long, list<meta_data>> s1, 
+				pair<long, list<meta_data>> s2){
+		return s1.first > s2.first;
+	};
+	
+	level_sort.sort(comp_level_sort);
+	if (level_sort.size()>0) {
+		candidates.merge(level_sort.front().second);
+	}
     candidates.merge(cnr_cds_list);
 
     auto comp = [](meta_data s1, meta_data s2){
