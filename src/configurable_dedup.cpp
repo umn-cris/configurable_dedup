@@ -28,10 +28,13 @@ bool configurable_dedup::IsBoundary(chunk ck) {
 }
 
 void configurable_dedup::Load2cache(const list<chunk>& features) {
-    list<meta_data> candidates = hooks_.PickCandidates(features);
+    //list<meta_data> candidates = hooks_.PickCandidates(features);
+    list<meta_data> candidates = hooks_.PickCandidatesFIFO(features);
     if(candidates.empty()) return;
+    long cap=g_IO_cap;
     for(const auto n:candidates){
-        cache_.Load(n);
+        if(cache_.Load(n))cap--;
+        if(cap<=0)return;
     }
 }
 
@@ -131,36 +134,34 @@ void configurable_dedup::DoDedup(){
                          m->Cnr_or_Recipe(false);
                          recipe_features.push_back(*m);
                    }
-
-                    if(cache_.LookUp(*m)){
+                   if(cache_.LookUp(*m)){
                         cache_hit++;
-                        //to do: inc score for according subset
-                    }else{
-                        //to do: minus score for according subset
+                   }else{
                         cache_miss++;
                         stored_chunks_++;
                         if(!current_cnr->AppendChunk(*m)){
                             Append2Containers(current_cnr);
                             current_cnr->AppendChunk(*m);
                         }
+
 						if(IfFeature(*m) && !g_only_recipe) {
 								m->Cnr_or_Recipe(true);
 								cnr_features.push_back(*m);
 						}
-                        //cout<<"miss "<<m->ID()<<" "<<m->RecipeName()<<" "<<m->CnrName()<<endl;
-                    }
-                    m++;
+                   }
+                   m++;
                 }
             }
             Append2Containers(current_cnr);
 
 
             /*4. update hooktable*/
-                hooks_.InsertRecipeFeatures(recipe_features);
-                hooks_.InsertCnrFeatures(cnr_features);
+            hooks_.InsertCnrFeatures(cnr_features);
+            //hooks_.InsertRecipeFeatures(recipe_features);
 
         }
         //for(auto n:recipes_) cout<<n.Name()<<" "<<n.Score()<<" "<<n.SequenceNumber()<<endl;
+
 //        hooks_.PrintHookInfo();
 /*        {
             cout << "print cnr" << endl;
@@ -169,6 +170,9 @@ void configurable_dedup::DoDedup(){
             for (auto n:recipes_)cout << n.Name() << " " << n.SequenceNumber() << endl;
         }*/
          IOloads = cnr_IOloads+recipe_IOloads;
+         long size=0;
+         for(auto n:hooks_.map_)size += n.second.candidates_.size();
+         long sample_ratio = total_chunks_/size;
         long current_cnr_IOloads = cnr_IOloads - last_cnr_IOloads;
         long current_recipe_IOloads = recipe_IOloads- last_recipe_IOloads;
         long current_IOloads = IOloads - last_IOloads;
@@ -176,6 +180,7 @@ void configurable_dedup::DoDedup(){
         long current_stored_chunks = stored_chunks_ - last_stored_chunks;
         double current_deduprate = current_total_chunks/(current_stored_chunks*1.0);
         double overall_deduprate = total_chunks_/(stored_chunks_*1.0);
+        cout<<"Sample_ratio"<<sample_ratio<<endl;
         cout<<"hook_hit:"<<hook_hit<<" cache hit:"<<cache_hit<<" cache miss:"<<cache_miss<<endl;
         cout<<"current cnr_IO:"<<current_cnr_IOloads<<" overall cnr_IO:"<<cnr_IOloads<<endl;
         cout<<"current recipe_IO:"<<current_recipe_IOloads<<" overall recipe_IO:"<<recipe_IOloads<<endl;

@@ -51,12 +51,16 @@ public:
 
     void InsertRecipeFeatures(const list<chunk>& cks);
     void InsertCnrFeatures(const list<chunk>& cks);
+    void Leveling(list<pair<long, list<meta_data>>>& level_sort, list<meta_data>& recipe_cds_list);
 
     void EraseChunk(chunk ck){
         EraseHookTable(ck);
     }
+
     list<meta_data> PickCandidates(const list<chunk>& features);
-    void EraseHookTable(chunk ck);
+    list<meta_data> PickCandidatesFIFO(const list<chunk>& features);
+
+        void EraseHookTable(chunk ck);
     void PrintHookInfo(){
         cout<<"print hook info~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"<<endl;
         cout<<"hook size:"<<map_.size()<<endl;
@@ -112,7 +116,7 @@ public:
         map_.erase(ck.ID());
     }
 
-    void Load(const meta_data value);
+    bool Load(const meta_data value);
     void Evict();
 };
 #endif //CONFIGURABLE_DEDUP_INDEX_TABLE_H

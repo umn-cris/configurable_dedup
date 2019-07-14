@@ -11,6 +11,25 @@
 extern vector<container> containers_;
 extern vector<recipe> recipes_;
 
+void hook_table::Leveling(list<pair<long, list<meta_data>>>& level_sort, list<meta_data>& recipe_cds_list){
+    for (auto it:recipe_cds_list) {
+        auto i=level_sort.begin();
+        for (; i!=level_sort.end(); i++) {
+            if (it.SequenceNumber() >= i->second.front().SequenceNumber()-3
+                && it.SequenceNumber() <= i->second.front().SequenceNumber()+3) {
+                i->second.push_back(it);
+                i->first += it.Score();
+                break;
+            }
+        }
+        if (i == level_sort.end()) {
+            list<meta_data> tmp_list;
+            tmp_list.push_back(it);
+            level_sort.push_back(make_pair(it.Score(), tmp_list));
+        }
+    }
+}
+
 list<meta_data> hook_table::PickCandidates(const list<chunk>& features) {
     list<meta_data> candidates;
     list<meta_data> tmp_candidates;
@@ -38,40 +57,28 @@ list<meta_data> hook_table::PickCandidates(const list<chunk>& features) {
       cnr_cds_list.back().SetScore(it.second);
     }
 
-	// special leveling algorithm
+	// begin of special leveling algorithm
 	list<pair<long, list<meta_data>>> level_sort;
-	for (auto it:recipe_cds_list) {
-		auto i=level_sort.begin();
-		for (; i!=level_sort.end(); i++) {
-			if (it.SequenceNumber() >= i->second.front().SequenceNumber()-3 
-				 && it.SequenceNumber() <= i->second.front().SequenceNumber()+3) {
-				i->second.push_back(it);
-				i->first += it.Score();
-			 	break;
-			}
-		}
-		if (i == level_sort.end()) {
-			list<meta_data> tmp_list;
-			tmp_list.push_back(it);
-			level_sort.push_back(make_pair(it.Score(), tmp_list));
-		}
-	}
+    Leveling(level_sort,recipe_cds_list);
 
-	auto comp_level_sort = [](pair<long, list<meta_data>> s1, 
-				pair<long, list<meta_data>> s2){
-		return s1.first > s2.first;
-	};
-	
-	level_sort.sort(comp_level_sort);
-	if (level_sort.size()>0) {
-		candidates.merge(level_sort.front().second);
-	}
+    auto comp_level_sort = [](pair<long, list<meta_data>> s1,
+                              pair<long, list<meta_data>> s2){
+        return s1.first > s2.first;
+    };
+
+    level_sort.sort(comp_level_sort);
+
+    if (!level_sort.empty()) {
+        candidates.merge(level_sort.front().second);
+    }
     candidates.merge(cnr_cds_list);
+    //end of special leveling algorithm
+
 
     auto comp = [](meta_data s1, meta_data s2){
         return s1.Score()>s2.Score();
     };
-    candidates.sort(comp); // sort candidates according to their score
+    candidates.sort(comp);
 
 /*    for(auto n:candidates)cout<<n.IfCnr()<<" "<<n.Score() << endl;
     cout<<endl;*/
@@ -99,6 +106,33 @@ list<meta_data> hook_table::PickCandidates(const list<chunk>& features) {
     return candidates;
 }
 
+list<meta_data> hook_table::PickCandidatesFIFO(const list<chunk>& features) {
+    list<meta_data> candidates;
+    list<meta_data> tmp_candidates;
+
+
+    for( auto n:features){
+        tmp_candidates = LookUp(n.ID());
+        for (auto it:tmp_candidates) {
+            candidates.push_back(it);
+        }
+    }
+
+    if(g_only_cnr){
+        for(list<meta_data>::iterator it=candidates.begin();it!=candidates.end();){
+            if(!it->IfCnr())  it = candidates.erase(it);
+            else it++;
+        }
+    }
+    if(g_only_recipe){
+        for(list<meta_data>::iterator it=candidates.begin();it!=candidates.end();){
+            if(it->IfCnr())  it = candidates.erase(it);
+            else it++;
+        }
+    }
+
+    return candidates;
+}
 
 void hook_table::InsertRecipeFeatures(const list<chunk>& cks) {
     for(auto n:cks){
@@ -131,13 +165,7 @@ void hook_table::EraseHookTable(chunk ck) {}
 
 
 
-
-
-
-
-
-
-void lru_cache::Load(const meta_data value) {
+bool lru_cache::Load(const meta_data value) {
     // if target subset is already loaded into cache, make it as the first subset in the lru list.
     /*if(subsets_.find(value.Name())!=subsets_.end() && subsets_[value.Name()]->IfCnr() == value.IfCnr()){
         lru_cache_.remove(value);
@@ -148,7 +176,7 @@ void lru_cache::Load(const meta_data value) {
         if(n.Name() == value.Name() && n.IfCnr() == value.IfCnr()) {
             lru_cache_.remove(value);
             lru_cache_.push_front(value);
-            return;
+            return false;
         }
     }
 
@@ -166,6 +194,8 @@ void lru_cache::Load(const meta_data value) {
         InsertChunks(recipes_[value.Name()].chunks_, false);
         recipe_IOloads++;
     }
+    return true;
+
 }
 
 void lru_cache::Evict() {
