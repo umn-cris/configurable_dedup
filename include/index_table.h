@@ -7,7 +7,8 @@
 #ifndef CONFIGURABLE_DEDUP_INDEX_TABLE_H
 #define CONFIGURABLE_DEDUP_INDEX_TABLE_H
 
-
+extern vector<container> containers_;
+extern vector<recipe> recipes_;
 
 class index_table{
 public:
