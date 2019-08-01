@@ -3,7 +3,7 @@
 //
 
 #include "global.h"
-
+bool g_if_exact=false;
 bool g_only_cnr=false;
 bool g_only_recipe=false;
 long g_cache_size=0;
@@ -29,7 +29,7 @@ int Parse(string cfgfile){
     string line;
 
     while(getline(filestream, line)) {
-        if (!line.size() || line[0]== '#')
+        if (line.size()<=1 || line[0]== '#')
             continue;
 
         stringstream ss(line);
@@ -76,6 +76,9 @@ int Parse(string cfgfile){
                 break;
             case hash_("only_recipe"):
                 g_only_recipe = (value=="true");
+                break;
+            case hash_("if_exact"):
+                g_if_exact = (value=="true");
                 break;
             default:
                 cout<<"unknown cfg: "<<key<<endl;

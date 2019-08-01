@@ -68,7 +68,19 @@ class chunk{
     long recipe_name_=-1;
     bool if_cnr_=false;
 public:
-    chunk(){}
+    chunk(){
+        size_=0;
+        cnr_name_=-1;
+        recipe_name_=-1;
+        if_cnr_= false;
+    }
+    chunk(const chunk &value){
+        chunk_id_=value.chunk_id_;
+        size_=value.size_;
+        cnr_name_=value.cnr_name_;
+        recipe_name_=value.recipe_name_;
+        if_cnr_=value.if_cnr_;
+    }
     void SetID(string id){
         chunk_id_=id;
     }

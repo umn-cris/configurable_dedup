@@ -1,5 +1,6 @@
 #include "global.h"
 #include "configurable_dedup.h"
+#include "bloom_store.h"
 int main(int argc, char** argv) {
     if (argc != 2) {
         cerr<<"argc must be 2"<<endl;
@@ -12,11 +13,13 @@ int main(int argc, char** argv) {
         cerr<< "parse config file " << cfgfile << " failed!\n";
         return -1;
     }
-
+    if(!g_if_exact)
     {
-
         configurable_dedup dedup_process;
         dedup_process.DoDedup();
+    }else{
+        bloom_store bloombloom;
+        bloombloom.DoDedup();
     }
     return 0;
 }
