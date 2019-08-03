@@ -3,16 +3,13 @@
 //
 
 #include "bloom_store.h"
-bool bloom_partition::Append2Containers(container *cnr) {
-    containers_.push_back(*cnr);
-    cnr->reset();
-    return true;
-}
+
 void bloom_partition::PartitionDedup(chunk ck) {
     local_total_chunks_++;
-    cout<<local_total_chunks_<<" ";
+    //cout<<local_total_chunks_<<" ";
+
     if(BFs_.empty()) {
-        bloom_filter bf(888);
+        BloomFilter<string> bf(g_container_size,0.1);
         BFs_.push_back(bf);
     }
     if(containers_.empty()){
@@ -21,7 +18,7 @@ void bloom_partition::PartitionDedup(chunk ck) {
     }
 
     for(int i=0; i<BFs_.size(); i++){
-        if(BFs_[i].BloomCheck(ck.ID().c_str())){
+        if(BFs_[i].key_may_match(ck.ID())){
             if(i!=activeBF_) {
                 local_IOtimes_++;
             }
@@ -33,24 +30,17 @@ void bloom_partition::PartitionDedup(chunk ck) {
         }
     }
     local_stored_chunks_++;
-    cout<<local_stored_chunks_<<endl;
-
-    /*if(!containers_[activeBF_].AppendChunk(ck)){
+    //cout<<local_stored_chunks_<<endl;
+    if(!containers_[activeBF_].AppendChunk(ck)){
         activeBF_++;
         container cnr;
         containers_.push_back(cnr);
         containers_[activeBF_].AppendChunk(ck);
-        bloom_filter bf(888);
-        BFs_.push_back(bf);
-    }*/
-    if(!current_cnr->AppendChunk(ck)){
-        activeBF_++;
-        Append2Containers(current_cnr);
-        current_cnr->AppendChunk(ck);
-        bloom_filter bf(888);
+        BloomFilter<string> bf(g_container_size,0.1);
         BFs_.push_back(bf);
     }
-    BFs_[activeBF_].BloomAdd(ck.ID().c_str());
+
+    BFs_[activeBF_].insert(ck.ID());
 }
 
 long bloom_store::PartitionChunk(chunk ck) {
@@ -81,12 +71,13 @@ void bloom_store::DoDedup() {
         string trace_path;
         trace_path = g_dedup_trace_dir + trace_name;
         TraceReader *trace_ptr = new TraceReader(trace_path);
+        chunk ck;
         while (trace_ptr->HasNext()){
-            chunk ck = trace_ptr->Next();
+             ck = trace_ptr->Next();
             long target = PartitionChunk(ck);
-            cout<<"target: "<<target<<endl;
+            //cout<<"target: "<<target<<endl;
             partitions_[target].PartitionDedup(ck);
-            cout<<"end target: "<<target<<endl;
+            //cout<<"end target: "<<target<<endl;
         }
         for(auto n:partitions_){
             total_chunks+=n.local_total_chunks_;

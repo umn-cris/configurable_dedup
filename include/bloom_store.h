@@ -11,10 +11,10 @@
 
 class bloom_partition{
 private:
-    vector<bloom_filter> BFs_;
+    vector<BloomFilter<string>> BFs_;
     vector<container> containers_;
     long activeBF_=0;
-    container* current_cnr = new container(0,0,"container");
+    //container* current_cnr = new container(0,0,"container");
 
 public:
 
@@ -22,7 +22,6 @@ public:
     long local_stored_chunks_=0;
     long local_IOtimes_=0;
     void PartitionDedup(chunk ck);
-    bool Append2Containers(container* cnr);
 
 };
 class bloom_store{

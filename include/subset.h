@@ -81,6 +81,7 @@ public:
         recipe_name_=value.recipe_name_;
         if_cnr_=value.if_cnr_;
     }
+    ~chunk(){};
     void SetID(string id){
         chunk_id_=id;
     }
