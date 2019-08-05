@@ -7,7 +7,8 @@
 #ifndef CONFIGURABLE_DEDUP_INDEX_TABLE_H
 #define CONFIGURABLE_DEDUP_INDEX_TABLE_H
 
-
+extern vector<container> containers_;
+extern vector<recipe> recipes_;
 
 class index_table{
 public:
@@ -17,6 +18,7 @@ public:
 
 class hook_entry{
 public:
+    hook_entry(){}
     chunk ck_;
     list<meta_data> candidates_; //subset score & subset's metadata
 

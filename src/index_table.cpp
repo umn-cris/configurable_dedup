@@ -8,9 +8,6 @@
 #include "index_table.h"
 
 
-extern vector<container> containers_;
-extern vector<recipe> recipes_;
-
 void hook_table::Leveling(list<pair<long, list<meta_data>>>& level_sort, list<meta_data>& recipe_cds_list){
     for (auto it:recipe_cds_list) {
         auto i=level_sort.begin();
