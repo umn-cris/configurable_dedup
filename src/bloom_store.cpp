@@ -22,13 +22,18 @@ void bloom_partition::PartitionDedup(chunk ck) {
             if(i!=activeBF_) {
                 local_IOtimes_++;
             }
+						/*
             for(auto m:containers_[i].chunks_){
                 if(ck.ID() == m.ID()){
                     return;
                 }
             }
+						*/
         }
     }
+		if (cache_.find(ck.ID()) != cache_.end()) {
+			return;
+		}		
     local_stored_chunks_++;
     //cout<<local_stored_chunks_<<endl;
     if(!containers_[activeBF_].AppendChunk(ck)){
@@ -40,6 +45,7 @@ void bloom_partition::PartitionDedup(chunk ck) {
         BFs_.push_back(bf);
     }
 
+		cache_.insert(ck.ID());
     BFs_[activeBF_].insert(ck.ID());
 }
 
