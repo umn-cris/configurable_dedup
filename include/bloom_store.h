@@ -9,13 +9,13 @@
 #include "subset.h"
 #include "trace_reader.h"
 
-#include <set>
+#include <unordered_set>
 
 class bloom_partition{
 private:
     vector<BloomFilter<string>> BFs_;
     vector<container> containers_;
-		set<string> cache_;
+		unordered_set<string> cache_;
     long activeBF_=0;
     //container* current_cnr = new container(0,0,"container");
 
