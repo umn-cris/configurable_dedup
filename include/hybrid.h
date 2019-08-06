@@ -11,6 +11,7 @@
 #include "index_table.h"
 
 #include <utility>
+#include <unordered_map>
 
 
 class HookItem{
@@ -73,7 +74,7 @@ public:
     void LoadSubset2cache(const list<meta_data> candidates);
 		bool IfRecipeHook(const chunk& ck);
     bool IfFeature(const chunk& ck);
-		list<meta_data> SelectSubset(list<HookItem*> hook_entries);
+		list<meta_data> SelectSubset(unordered_map<string, HookItem*> hook_map);
 };
 
 
