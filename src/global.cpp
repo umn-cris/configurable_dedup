@@ -4,6 +4,7 @@
 
 #include "global.h"
 bool g_if_exact=false;
+bool g_if_hybrid=false;
 bool g_only_cnr=false;
 bool g_only_recipe=false;
 long g_cache_size=0;
@@ -80,6 +81,9 @@ int Parse(string cfgfile){
             case hash_("if_exact"):
                 g_if_exact = (value=="true");
                 break;
+						case hash_("if_hybrid"):
+								g_if_hybrid = (value=="true");
+								break;
             default:
                 cout<<"unknown cfg: "<<key<<endl;
                 return -1;

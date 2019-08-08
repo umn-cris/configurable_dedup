@@ -4,39 +4,43 @@
 
 #include "hybrid.h"
 #include "trace_reader.h"
+#include <set>
 
 void HookIndex::InsertRecipeHook(const chunk &ck) {
 	HookItem* entry;
+	//cout<<"add recipe hook: "<<ck.ID()<<endl;
   if (LookUp(ck.ID(),&entry)) {
-  	entry->recipe_hook.push_back(recipes_[ck.RecipeName()].Meta());
+  	entry->recipe_hook.push_back(ck.RecipeName());
   } else {
     HookItem tmp_entry;
     tmp_entry.ck_ = ck;
-    tmp_entry.recipe_hook.push_back(recipes_[ck.RecipeName()].Meta());
+    tmp_entry.recipe_hook.push_back(ck.RecipeName());
     map_.emplace(ck.ID(),tmp_entry);
   }
 }
 
 void HookIndex::InsertRecipeFeature(const chunk &ck) {
 	HookItem* entry;
+	//cout<<"add recipe feature: "<<ck.ID()<<endl;
   if (LookUp(ck.ID(),&entry)) {
-  	entry->recipe_ptr.push_back(recipes_[ck.RecipeName()].Meta());
+  	entry->recipe_ptr.push_back(ck.RecipeName());
   } else {
     HookItem tmp_entry;
     tmp_entry.ck_ = ck;
-    tmp_entry.recipe_ptr.push_back(recipes_[ck.RecipeName()].Meta());
+    tmp_entry.recipe_ptr.push_back(ck.RecipeName());
     map_.emplace(ck.ID(),tmp_entry);
   }
 }
 
 void HookIndex::InsertCNRFeature(const chunk &ck) {
 	HookItem* entry;
+	//cout<<"add cnr feature: "<<ck.ID()<<endl;
   if (LookUp(ck.ID(),&entry)) {
-     entry->cnr_ptr.push_back(containers_[ck.CnrName()].Meta());
+     entry->cnr_ptr.push_back(ck.CnrName());
   } else {
      HookItem tmp_entry;
      tmp_entry.ck_ = ck;
-     tmp_entry.cnr_ptr.push_back(containers_[ck.CnrName()].Meta());
+     tmp_entry.cnr_ptr.push_back(ck.CnrName());
      map_.emplace(ck.ID(),tmp_entry);
   }
 }
@@ -105,9 +109,105 @@ bool HybridDedup::IfFeature(const chunk& ck) {
 }
 
 
-list<meta_data> HybridDedup::SelectSubset(list<HookItem*> hook_entries) {
+list<meta_data> HybridDedup::SelectSubset(unordered_map<string, HookItem*> hook_map) {
 	list<meta_data> selected_subsets;
 	
+	unordered_map<long, set<string>> recipe_map;  //the map from recipe to its hitted hook chunk id
+	unordered_map<long, set<string>> recipe_ptr_map;
+	unordered_map<long, set<string>> cnr_ptr_map;
+
+	/*first, insert the mapping of recipe->hookset*/
+	for (auto it = hook_map.begin(); it!=hook_map.end(); it++) {
+		string id = it->second->ck_.ID();
+		for (auto i=it->second->recipe_hook.begin(); i!=it->second->recipe_hook.end(); i++) {
+			recipe_map[*i].insert(id);
+		}
+		for (auto i=it->second->recipe_ptr.begin(); i!=it->second->recipe_ptr.end(); i++) {
+			recipe_ptr_map[*i].insert(id);
+		}
+		for (auto i=it->second->cnr_ptr.begin(); i!=it->second->cnr_ptr.end(); i++) {
+			cnr_ptr_map[*i].insert(id);
+		}
+	}
+
+	/*second, select the recipe candidates*/
+	long k=5;
+	vector<long> recipe_selected(k, -1);
+	list<meta_data> recipe_cans;
+
+	for(long i=0; i<k; i++) {
+		long s = 0;
+		set<string> top_set;
+		for (auto it = recipe_map.begin(); it!=recipe_map.end(); it++) {
+			if(it->second.size() > s) {
+				s = it->second.size();
+				top_set = it->second;
+				recipe_selected[i] = it->first;
+			}
+		}
+
+		for (auto it = top_set.begin(); it!=top_set.end(); it++) {
+			for (auto l = hook_map[*it]->recipe_hook.begin(); l != hook_map[*it]->recipe_hook.begin(); l++) {
+				recipe_map[*l].erase(*it);
+			}
+		}
+
+		if (recipe_map.find(recipe_selected[i]) != recipe_map.end()) {
+			recipe_map.erase(recipe_selected[i]);
+			cout<<"recipe_selected: "<<recipe_selected[i]<<" "<<top_set.size()<<endl;
+		}
+
+		
+	}
+
+	/*Third, exclude the hooks in the selected recipe segments*/
+	for (long i=0; i < k; i++) {
+		if (recipe_selected[i] != -1) {
+			recipe_cans.push_back(recipes_[recipe_selected[i]].Meta());
+			if (recipe_ptr_map.find(recipe_selected[i]) != recipe_ptr_map.end()) {
+				for (auto it = recipe_ptr_map[recipe_selected[i]].begin(); it!= recipe_ptr_map[recipe_selected[i]].end(); it++) {
+					for (auto l=hook_map[*it]->cnr_ptr.begin(); l!= hook_map[*it]->cnr_ptr.end(); l++) {
+						cnr_ptr_map[*l].erase(*it);
+					}
+				}
+			}
+		}
+	}
+
+
+	/*forth, select the cnr candidates*/
+	long h=10;
+	vector<long> cnr_selected(h, -1);
+	list<meta_data> cnr_cans;	
+
+	for(long i=0; i<h; i++) {
+		long s = 0;
+		set<string> top_set;
+		for (auto it = cnr_ptr_map.begin(); it!=cnr_ptr_map.end(); it++) {
+			if(it->second.size() > s) {
+				s = it->second.size();
+				top_set = it->second;
+				cnr_selected[i] = it->first;
+			}
+		}
+
+		for (auto it = top_set.begin(); it!=top_set.end(); it++) {
+			for (auto l = hook_map[*it]->cnr_ptr.begin(); l != hook_map[*it]->cnr_ptr.begin(); l++) {
+				cnr_ptr_map[*l].erase(*it);
+			}
+		}
+		if (cnr_selected[i] > 0) {
+			cout<<"cnr_selected: "<<cnr_selected[i]<<" "<<top_set.size()<<endl;
+			cnr_cans.push_back(containers_[cnr_selected[i]].Meta());
+		}
+
+		if (cnr_ptr_map.find(cnr_selected[i]) != cnr_ptr_map.end()) {
+			cnr_ptr_map.erase(cnr_selected[i]);
+		}
+	}
+    
+	selected_subsets.merge(recipe_cans);
+	selected_subsets.merge(cnr_cans);
 	return selected_subsets; 
 }
 
@@ -161,15 +261,15 @@ void HybridDedup::DoDedup() {
             CDSegmenting(window_,current_recipe,segments_);
             list<chunk> recipe_features;
             list<chunk> cnr_features;
-            list<HookItem*> hitted_hook_entries;
+            unordered_map<string, HookItem*> hitted_hook_map;
 
             for(auto n:*segments_){
               list<chunk>::iterator m = n.chunks_.begin();
               /*1. pick hook*/
               while (m!=n.chunks_.end()){
 								HookItem* tmp_hook_ptr;
-              	if(index_.LookUp((*m).ID(), &tmp_hook_ptr)){
-                	hitted_hook_entries.push_back(tmp_hook_ptr);
+              	if(index_.LookUp((*m).ID(), &tmp_hook_ptr) && hitted_hook_map.find((*m).ID()) == hitted_hook_map.end()){
+                	hitted_hook_map[(*m).ID()] = tmp_hook_ptr;
                 	hook_hit++;
               	}
               	m++;
@@ -179,7 +279,7 @@ void HybridDedup::DoDedup() {
              * although only features belong to recipe that hit the hook table, those loaded subsets including both cnr and recipe
              * in here, old features(hit hook table) are recipe features while new features (not contained in hook table) are cnr features*/
 
-            LoadSubset2cache(SelectSubset(hitted_hook_entries));
+            LoadSubset2cache(SelectSubset(hitted_hook_map));
 
 
             /*3. dedup via lru_cache and process the hook selection*/

@@ -1,6 +1,8 @@
 #include "global.h"
 #include "configurable_dedup.h"
 #include "bloom_store.h"
+#include "hybrid.h"
+
 int main(int argc, char** argv) {
     if (argc != 2) {
         cerr<<"argc must be 2"<<endl;
@@ -15,9 +17,15 @@ int main(int argc, char** argv) {
     }
     if(!g_if_exact)
     {
-        configurable_dedup dedup_process;
-        dedup_process.DoDedup();
-    }else{
+				if (g_if_hybrid) {
+					HybridDedup dedup;
+					dedup.DoDedup();
+				} else {
+        	configurable_dedup dedup_process;
+        	dedup_process.DoDedup();
+				}
+		}
+		else{
         bloom_store bloombloom;
         bloombloom.DoDedup();
     }

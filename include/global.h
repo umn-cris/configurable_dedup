@@ -26,6 +26,7 @@
 #include <math.h>
 using namespace std;
 extern bool g_if_exact;
+extern bool g_if_hybrid;
 extern bool g_only_cnr;
 extern bool g_only_recipe;
 extern long g_cache_size;
