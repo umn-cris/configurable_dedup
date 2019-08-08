@@ -1,4 +1,5 @@
-if_exact true
+if_exact false
+if_hybrid true
 
 only_recipe false
 only_cnr true
@@ -16,7 +17,7 @@ container_size 256
 window_size 2048
 
 #unit subset
-IO_cap 64
+IO_cap 10
 
 #sample ratio
 bit_num1 6

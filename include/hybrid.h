@@ -17,9 +17,9 @@
 class HookItem{
 public:
     chunk ck_;
-		list<meta_data> recipe_hook; //the ptr to the recipe uniform hooks only
-    list<meta_data> recipe_ptr;  // for selection use
-		list<meta_data> cnr_ptr;    //for selection use
+		list<long> recipe_hook; //the ptr to the recipe uniform hooks only
+    list<long> recipe_ptr;  // for selection use
+		list<long> cnr_ptr;    //for selection use
 
 };
 

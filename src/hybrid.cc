@@ -8,36 +8,39 @@
 
 void HookIndex::InsertRecipeHook(const chunk &ck) {
 	HookItem* entry;
+	//cout<<"add recipe hook: "<<ck.ID()<<endl;
   if (LookUp(ck.ID(),&entry)) {
-  	entry->recipe_hook.push_back(recipes_[ck.RecipeName()].Meta());
+  	entry->recipe_hook.push_back(ck.RecipeName());
   } else {
     HookItem tmp_entry;
     tmp_entry.ck_ = ck;
-    tmp_entry.recipe_hook.push_back(recipes_[ck.RecipeName()].Meta());
+    tmp_entry.recipe_hook.push_back(ck.RecipeName());
     map_.emplace(ck.ID(),tmp_entry);
   }
 }
 
 void HookIndex::InsertRecipeFeature(const chunk &ck) {
 	HookItem* entry;
+	//cout<<"add recipe feature: "<<ck.ID()<<endl;
   if (LookUp(ck.ID(),&entry)) {
-  	entry->recipe_ptr.push_back(recipes_[ck.RecipeName()].Meta());
+  	entry->recipe_ptr.push_back(ck.RecipeName());
   } else {
     HookItem tmp_entry;
     tmp_entry.ck_ = ck;
-    tmp_entry.recipe_ptr.push_back(recipes_[ck.RecipeName()].Meta());
+    tmp_entry.recipe_ptr.push_back(ck.RecipeName());
     map_.emplace(ck.ID(),tmp_entry);
   }
 }
 
 void HookIndex::InsertCNRFeature(const chunk &ck) {
 	HookItem* entry;
+	//cout<<"add cnr feature: "<<ck.ID()<<endl;
   if (LookUp(ck.ID(),&entry)) {
-     entry->cnr_ptr.push_back(containers_[ck.CnrName()].Meta());
+     entry->cnr_ptr.push_back(ck.CnrName());
   } else {
      HookItem tmp_entry;
      tmp_entry.ck_ = ck;
-     tmp_entry.cnr_ptr.push_back(containers_[ck.CnrName()].Meta());
+     tmp_entry.cnr_ptr.push_back(ck.CnrName());
      map_.emplace(ck.ID(),tmp_entry);
   }
 }
@@ -117,18 +120,18 @@ list<meta_data> HybridDedup::SelectSubset(unordered_map<string, HookItem*> hook_
 	for (auto it = hook_map.begin(); it!=hook_map.end(); it++) {
 		string id = it->second->ck_.ID();
 		for (auto i=it->second->recipe_hook.begin(); i!=it->second->recipe_hook.end(); i++) {
-			recipe_map[i->Name()].insert(id);
+			recipe_map[*i].insert(id);
 		}
 		for (auto i=it->second->recipe_ptr.begin(); i!=it->second->recipe_ptr.end(); i++) {
-			recipe_ptr_map[i->Name()].insert(id);
+			recipe_ptr_map[*i].insert(id);
 		}
 		for (auto i=it->second->cnr_ptr.begin(); i!=it->second->cnr_ptr.end(); i++) {
-			cnr_ptr_map[i->Name()].insert(id);
+			cnr_ptr_map[*i].insert(id);
 		}
 	}
 
 	/*second, select the recipe candidates*/
-	long k=10;
+	long k=5;
 	vector<long> recipe_selected(k, -1);
 	list<meta_data> recipe_cans;
 
@@ -145,10 +148,16 @@ list<meta_data> HybridDedup::SelectSubset(unordered_map<string, HookItem*> hook_
 
 		for (auto it = top_set.begin(); it!=top_set.end(); it++) {
 			for (auto l = hook_map[*it]->recipe_hook.begin(); l != hook_map[*it]->recipe_hook.begin(); l++) {
-				recipe_map[l->Name()].erase(*it);
+				recipe_map[*l].erase(*it);
 			}
 		}
 
+		if (recipe_map.find(recipe_selected[i]) != recipe_map.end()) {
+			recipe_map.erase(recipe_selected[i]);
+			cout<<"recipe_selected: "<<recipe_selected[i]<<" "<<top_set.size()<<endl;
+		}
+
+		
 	}
 
 	/*Third, exclude the hooks in the selected recipe segments*/
@@ -158,7 +167,7 @@ list<meta_data> HybridDedup::SelectSubset(unordered_map<string, HookItem*> hook_
 			if (recipe_ptr_map.find(recipe_selected[i]) != recipe_ptr_map.end()) {
 				for (auto it = recipe_ptr_map[recipe_selected[i]].begin(); it!= recipe_ptr_map[recipe_selected[i]].end(); it++) {
 					for (auto l=hook_map[*it]->cnr_ptr.begin(); l!= hook_map[*it]->cnr_ptr.end(); l++) {
-						cnr_ptr_map[l->Name()].erase(*it);
+						cnr_ptr_map[*l].erase(*it);
 					}
 				}
 			}
@@ -184,11 +193,16 @@ list<meta_data> HybridDedup::SelectSubset(unordered_map<string, HookItem*> hook_
 
 		for (auto it = top_set.begin(); it!=top_set.end(); it++) {
 			for (auto l = hook_map[*it]->cnr_ptr.begin(); l != hook_map[*it]->cnr_ptr.begin(); l++) {
-				cnr_ptr_map[l->Name()].erase(*it);
+				cnr_ptr_map[*l].erase(*it);
 			}
 		}
 		if (cnr_selected[i] > 0) {
+			cout<<"cnr_selected: "<<cnr_selected[i]<<" "<<top_set.size()<<endl;
 			cnr_cans.push_back(containers_[cnr_selected[i]].Meta());
+		}
+
+		if (cnr_ptr_map.find(cnr_selected[i]) != cnr_ptr_map.end()) {
+			cnr_ptr_map.erase(cnr_selected[i]);
 		}
 	}
     
@@ -254,7 +268,7 @@ void HybridDedup::DoDedup() {
               /*1. pick hook*/
               while (m!=n.chunks_.end()){
 								HookItem* tmp_hook_ptr;
-              	if(index_.LookUp((*m).ID(), &tmp_hook_ptr) && hitted_hook_map.find((*m).ID()) != hitted_hook_map.end()){
+              	if(index_.LookUp((*m).ID(), &tmp_hook_ptr) && hitted_hook_map.find((*m).ID()) == hitted_hook_map.end()){
                 	hitted_hook_map[(*m).ID()] = tmp_hook_ptr;
                 	hook_hit++;
               	}
