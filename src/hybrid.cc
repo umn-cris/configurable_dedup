@@ -154,7 +154,7 @@ list<meta_data> HybridDedup::SelectSubset(unordered_map<string, HookItem*> hook_
 
 		if (recipe_map.find(recipe_selected[i]) != recipe_map.end()) {
 			recipe_map.erase(recipe_selected[i]);
-			cout<<"recipe_selected: "<<recipe_selected[i]<<" "<<top_set.size()<<endl;
+			//cout<<"recipe_selected: "<<recipe_selected[i]<<" "<<top_set.size()<<endl;
 		}
 
 		
@@ -192,12 +192,12 @@ list<meta_data> HybridDedup::SelectSubset(unordered_map<string, HookItem*> hook_
 		}
 
 		for (auto it = top_set.begin(); it!=top_set.end(); it++) {
-			for (auto l = hook_map[*it]->cnr_ptr.begin(); l != hook_map[*it]->cnr_ptr.begin(); l++) {
+			for (auto l = hook_map[*it]->cnr_ptr.begin(); l != hook_map[*it]->cnr_ptr.end(); l++) {
 				cnr_ptr_map[*l].erase(*it);
 			}
 		}
-		if (cnr_selected[i] > 0) {
-			cout<<"cnr_selected: "<<cnr_selected[i]<<" "<<top_set.size()<<endl;
+		if (cnr_selected[i] > 0 && cnr_selected[i] <= containers_.size()) {
+			//cout<<"cnr_selected: "<<cnr_selected[i]<<" "<<top_set.size()<<endl;
 			cnr_cans.push_back(containers_[cnr_selected[i]].Meta());
 		}
 
