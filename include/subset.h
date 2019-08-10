@@ -59,6 +59,9 @@ public:
     bool operator <(meta_data d2){
         return (this->Name() < d2.Name());
     }
+		long GetChunkNum() {
+			return chunk_num_;
+		}
 };
 
 class chunk{
@@ -174,6 +177,9 @@ public:
     void IndicateRecipe(){
         meta_.IndicateRecipe();
     }
+		long GetChunkNum() {
+			return meta_.GetChunkNum();
+		}
 };
 
 class container: public subset{
