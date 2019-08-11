@@ -18,6 +18,7 @@ class HookItem{
 public:
     chunk ck_;
 		list<long> recipe_hook; //the ptr to the recipe uniform hooks only
+		list<long> cnr_hook;
     list<long> recipe_ptr;  // for selection use
 		list<long> cnr_ptr;    //for selection use
 
@@ -46,6 +47,7 @@ public:
 		
 		void InsertRecipeHook(const chunk &ck);
     void InsertRecipeFeature(const chunk &ck);
+		void InsertCNRHook(const chunk &ck);
     void InsertCNRFeature(const chunk &ck);
 		void EraseHookTable(chunk ck);
 		void EraseChunk(chunk ck){
@@ -72,9 +74,10 @@ public:
     void CDSegmenting( vector<chunk>& window, recipe* re, list<recipe>* segments);
     bool IsBoundary(chunk ck);
     void LoadSubset2cache(const list<meta_data> candidates);
-		bool IfRecipeHook(const chunk& ck);
+		bool IfHook(const chunk& ck);
     bool IfFeature(const chunk& ck);
 		list<meta_data> SelectSubsetDense(unordered_map<string, HookItem*> hook_map);
+		list<meta_data> SelectSubsetNO(unordered_map<string, HookItem*> hook_map);
 		list<meta_data> SelectSubset(unordered_map<string, HookItem*> hook_map);
 };
 
