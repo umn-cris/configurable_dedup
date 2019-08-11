@@ -28,8 +28,8 @@ bool configurable_dedup::IsBoundary(chunk ck) {
 }
 
 void configurable_dedup::Load2cache(const list<chunk>& features) {
-    //list<meta_data> candidates = hooks_.PickCandidates(features);
-    list<meta_data> candidates = hooks_.PickCandidatesFIFO(features);
+    list<meta_data> candidates = hooks_.PickCandidates(features);
+    //list<meta_data> candidates = hooks_.PickCandidatesFIFO(features);
     if(candidates.empty()) return;
     long cap=g_IO_cap;
     for(const auto n:candidates){
