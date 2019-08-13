@@ -1,5 +1,5 @@
 if_exact false
-if_hybrid false
+if_hybrid true
 
 only_recipe false
 only_cnr true

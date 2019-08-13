@@ -65,6 +65,10 @@ private:
     long total_chunks_=0;
     long stored_chunks_=0;
     long sequence_number_=0;
+		long total_cnr_hit_;
+		long cur_cnr_hit_;
+		long cur_io_cap_;
+		long t_win_num_;
 
 public:
 
@@ -79,6 +83,7 @@ public:
 		list<meta_data> SelectSubsetDense(unordered_map<string, HookItem*> hook_map);
 		list<meta_data> SelectSubsetNO(unordered_map<string, HookItem*> hook_map);
 		list<meta_data> SelectSubset(unordered_map<string, HookItem*> hook_map);
+		void AdjustIOCap(long can_num);
 };
 
 

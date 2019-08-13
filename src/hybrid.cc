@@ -84,10 +84,12 @@ void HybridDedup::LoadSubset2cache(const list<meta_data> candidates) {
     if(candidates.empty()) {
 			return;
 		}
-    long cap=g_IO_cap;
+		long io=0;
     for(const auto n:candidates) {
-        if(cache_.Load(n))cap--;
-        if(cap<=0) {
+        if(cache_.Load(n)) {
+					io++;
+				}
+        if(io>=cur_io_cap_) {
 					return;
 				}
     }
@@ -145,6 +147,9 @@ list<meta_data> HybridDedup::SelectSubsetDense(unordered_map<string, HookItem*> 
 			cnr_ptr_map[*i].insert(id);
 		}
 	}
+
+	cur_cnr_hit_ = cnr_ptr_map.size();
+	total_cnr_hit_ += cur_cnr_hit_;
 
 	/*second, select the recipe candidates*/
 	long k=static_cast<long>(recipe_map.size());
@@ -257,6 +262,9 @@ list<meta_data> HybridDedup::SelectSubsetNO(unordered_map<string, HookItem*> hoo
 		}
 	}
 
+	cur_cnr_hit_ = cnr_ptr_map.size();
+	total_cnr_hit_ += cur_cnr_hit_;
+
 	/*second, select the recipe candidates*/
 	long k=6;
 	vector<long> recipe_selected(k, -1);
@@ -356,6 +364,9 @@ list<meta_data> HybridDedup::SelectSubset(unordered_map<string, HookItem*> hook_
 		}
 	}
 
+	cur_cnr_hit_ = cnr_ptr_map.size();
+	total_cnr_hit_ += cur_cnr_hit_;
+
 	/*second, select the recipe candidates*/
 	long k=6;
 	vector<long> recipe_selected(k, -1);
@@ -438,12 +449,33 @@ list<meta_data> HybridDedup::SelectSubset(unordered_map<string, HookItem*> hook_
 }
 
 
+void HybridDedup::AdjustIOCap(long can_num) {
+	if (can_num <= g_IO_cap) {
+		cur_io_cap_ = g_IO_cap;
+		return;
+	}
+	long cur_io = cnr_IOloads+recipe_IOloads;
+	long exp_io = t_win_num_ * g_IO_cap;
+	long credit = exp_io - cur_io;
+	/*
+	double ave_hit = static_cast<double>(total_cnr_hit_) / static_cast<double>(t_win_num_);
+	if (static_cast<double>(cur_cnr_hit_) < ave_hit) {
+		cur_io_cap_ = g_IO_cap;
+		return;
+	}
+	long cal_io = static_cast<long>(ceil(g_IO_cap * static_cast<double>(cur_cnr_hit_)/ave_hit));
+	*/
+	cur_io_cap_ = credit;
+	return;
+}
+
+
 void HybridDedup::DoDedup() {
 
     container* current_cnr = new container(0,0,"container");
     recipe* current_recipe = new recipe(0,0,"recipe");
     list<recipe>* segments_= new list<recipe>;
-		long total_win = 0;
+		t_win_num_ = 0;
 
     string trace_sum, trace_name, trace_line;
     ifstream TraceSumFile;
@@ -485,7 +517,7 @@ void HybridDedup::DoDedup() {
             }
 
 						cur_win++;
-						total_win++;
+						t_win_num_++;
             segments_->clear();
             CDSegmenting(window_,current_recipe,segments_);
             list<chunk> recipe_features;
@@ -508,7 +540,10 @@ void HybridDedup::DoDedup() {
              * although only features belong to recipe that hit the hook table, those loaded subsets including both cnr and recipe
              * in here, old features(hit hook table) are recipe features while new features (not contained in hook table) are cnr features*/
 
-            LoadSubset2cache(SelectSubsetNO(hitted_hook_map));
+						cur_io_cap_ = g_IO_cap;
+						list<meta_data> selected_subsets = SelectSubsetNO(hitted_hook_map);
+						AdjustIOCap(static_cast<long>(selected_subsets.size()));
+            LoadSubset2cache(selected_subsets);
 
 
             /*3. dedup via lru_cache and process the hook selection*/
@@ -559,7 +594,7 @@ void HybridDedup::DoDedup() {
         double overall_deduprate = total_chunks_/(stored_chunks_*1.0);
         cout<<"recipe_sample_ratio: "<<recipe_sample_ratio<<endl;
 				cout<<"cnr_sample_ratio: "<<cnr_sample_ratio<<endl;
-				cout<<"total windows: "<<total_win<<" current windows: "<<cur_win<<endl;
+				cout<<"total windows: "<<t_win_num_<<" current windows: "<<cur_win<<endl;
         cout<<"hook_hit:"<<hook_hit<<" cache hit:"<<cache_hit<<" cache miss:"<<cache_miss<<endl;
         cout<<"current cnr_IO:"<<current_cnr_IOloads<<" overall cnr_IO:"<<cnr_IOloads<<endl;
         cout<<"current recipe_IO:"<<current_recipe_IOloads<<" overall recipe_IO:"<<recipe_IOloads<<endl;
