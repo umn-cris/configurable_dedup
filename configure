@@ -1,8 +1,8 @@
-if_exact false
+if_exact true
 if_hybrid false
 
 only_recipe false
-only_cnr true
+only_cnr false
 
 #unit subset/cache
 cache_size 64
@@ -17,7 +17,7 @@ container_size 256
 window_size 2048
 
 #unit subset
-IO_cap 11
+IO_cap 20
 
 #sample ratio
 bit_num1 6

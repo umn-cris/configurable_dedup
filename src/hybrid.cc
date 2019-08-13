@@ -258,7 +258,11 @@ list<meta_data> HybridDedup::SelectSubsetNO(unordered_map<string, HookItem*> hoo
 	}
 
 	/*second, select the recipe candidates*/
-	long k=6;
+	long bound = g_window_size / g_container_size;
+	long k=bound;
+	if (g_IO_cap > bound) {
+		k = max(0, static_cast<int>(k*2 - g_IO_cap));
+	}
 	vector<long> recipe_selected(k, -1);
 	list<meta_data> recipe_cans;
 	set<string> selected_hooks;
@@ -289,7 +293,7 @@ list<meta_data> HybridDedup::SelectSubsetNO(unordered_map<string, HookItem*> hoo
 
 		
 	}
-
+	return selected_subsets;
 	/*Third, exclude the cnrs that have high overlap with the data in the selected set*/
 	for (auto it = cnr_map.begin(); it !=cnr_map.end(); it++) {
 			double ratio = 0.8;
@@ -321,7 +325,7 @@ list<meta_data> HybridDedup::SelectSubsetNO(unordered_map<string, HookItem*> hoo
 				cnr_selected[i] = it->first;
 			}
 		}
-		if (cnr_selected[i] > 0 && cnr_selected[i] < containers_.size()) {
+		if (!g_only_recipe && cnr_selected[i] > 0 && cnr_selected[i] < containers_.size()) {
 			//cout<<"cnr_selected: "<<cnr_selected[i]<<" "<<top_set.size()<<endl;
 			selected_subsets.push_back(containers_[cnr_selected[i]].Meta());
 		}

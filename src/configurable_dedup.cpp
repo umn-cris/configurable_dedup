@@ -157,7 +157,7 @@ void configurable_dedup::DoDedup(){
 
             /*4. update hooktable*/
             hooks_.InsertCnrFeatures(cnr_features);
-            //hooks_.InsertRecipeFeatures(recipe_features);
+            hooks_.InsertRecipeFeatures(recipe_features);
 
         }
         //for(auto n:recipes_) cout<<n.Name()<<" "<<n.Score()<<" "<<n.SequenceNumber()<<endl;
