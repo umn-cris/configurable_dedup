@@ -33,7 +33,6 @@ public:
         	if(sampler_.PositiveFeatures(ck,g_bit_num1)) return true;
         	if(sampler_.NegativeFeatures(ck,g_bit_num2)) return true;
 		}
-
         return false;
     }
     long inline CnrScore(){
