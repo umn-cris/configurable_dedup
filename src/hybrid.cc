@@ -301,7 +301,7 @@ list<meta_data> HybridDedup::SelectSubsetNO(unordered_map<string, HookItem*> hoo
 
 		
 	}
-	return selected_subsets;
+
 	/*Third, exclude the cnrs that have high overlap with the data in the selected set*/
 	for (auto it = cnr_map.begin(); it !=cnr_map.end(); it++) {
 			double ratio = 0.8;
@@ -333,7 +333,7 @@ list<meta_data> HybridDedup::SelectSubsetNO(unordered_map<string, HookItem*> hoo
 				cnr_selected[i] = it->first;
 			}
 		}
-		if (!g_only_recipe && cnr_selected[i] > 0 && cnr_selected[i] < containers_.size()) {
+		if (cnr_selected[i] > 0 && cnr_selected[i] < containers_.size()) {
 			//cout<<"cnr_selected: "<<cnr_selected[i]<<" "<<top_set.size()<<endl;
 			selected_subsets.push_back(containers_[cnr_selected[i]].Meta());
 		}
