@@ -269,7 +269,7 @@ list<meta_data> HybridDedup::SelectSubsetNO(unordered_map<string, HookItem*> hoo
 	long bound = g_window_size / g_container_size;
 	long k=bound;
 	if (g_IO_cap > bound) {
-		k = max(0, static_cast<int>(k*2 - g_IO_cap));
+		k = max(static_cast<int>(bound/2), static_cast<int>(k*2 - g_IO_cap));
 	}
 	vector<long> recipe_selected(k, -1);
 	list<meta_data> recipe_cans;
@@ -461,15 +461,15 @@ void HybridDedup::AdjustIOCap(long can_num) {
 	long cur_io = cnr_IOloads+recipe_IOloads;
 	long exp_io = t_win_num_ * g_IO_cap;
 	long credit = exp_io - cur_io;
-	/*
+
 	double ave_hit = static_cast<double>(total_cnr_hit_) / static_cast<double>(t_win_num_);
 	if (static_cast<double>(cur_cnr_hit_) < ave_hit) {
 		cur_io_cap_ = g_IO_cap;
 		return;
 	}
 	long cal_io = static_cast<long>(ceil(g_IO_cap * static_cast<double>(cur_cnr_hit_)/ave_hit));
-	*/
-	cur_io_cap_ = credit;
+	cur_io_cap_ = min(static_cast<int>(g_cache_size), min(static_cast<int>(credit), static_cast<int>(cal_io)));
+	cur_io_cap_ = min(static_cast<int>(g_cache_size), static_cast<int>(credit));
 	return;
 }
 
@@ -544,9 +544,10 @@ void HybridDedup::DoDedup() {
              * although only features belong to recipe that hit the hook table, those loaded subsets including both cnr and recipe
              * in here, old features(hit hook table) are recipe features while new features (not contained in hook table) are cnr features*/
 
-						cur_io_cap_ = g_IO_cap;
-						list<meta_data> selected_subsets = SelectSubsetNO(hitted_hook_map);
-						AdjustIOCap(static_cast<long>(selected_subsets.size()));
+			cur_io_cap_ = g_IO_cap;
+			list<meta_data> selected_subsets = SelectSubsetNO(hitted_hook_map);
+			AdjustIOCap(static_cast<long>(selected_subsets.size()));
+			//cout<<selected_subsets.size()<<" "<<cur_io_cap_<<endl;
             LoadSubset2cache(selected_subsets);
 
 
