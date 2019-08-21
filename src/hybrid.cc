@@ -480,6 +480,8 @@ void HybridDedup::DoDedup() {
     recipe* current_recipe = new recipe(0,0,"recipe");
     list<recipe>* segments_= new list<recipe>;
 		t_win_num_ = 0;
+		long recipe_hook_num = 0;
+		long cnr_hook_num = 0;
 
     string trace_sum, trace_name, trace_line;
     ifstream TraceSumFile;
@@ -497,8 +499,6 @@ void HybridDedup::DoDedup() {
         long last_recipe_IOloads = recipe_IOloads;
         long last_total_chunks = total_chunks_;
         long last_stored_chunks = stored_chunks_;
-				long recipe_hook_num = 0;
-				long cnr_hook_num = 0;
 				long cur_win = 0;
 
 
@@ -588,8 +588,17 @@ void HybridDedup::DoDedup() {
 				}
 
         IOloads = cnr_IOloads+recipe_IOloads;
-        long recipe_sample_ratio = total_chunks_/recipe_hook_num;
-				long cnr_sample_ratio = stored_chunks_/cnr_hook_num;
+				double recipe_sample_ratio, cnr_sample_ratio;
+				if (recipe_hook_num == 0) {
+					recipe_sample_ratio = 0.0;
+				} else {
+        	recipe_sample_ratio = total_chunks_/(recipe_hook_num * 1.0);
+				}
+				if (cnr_hook_num == 0) {
+					cnr_sample_ratio = 0.0;
+				} else {
+        	cnr_sample_ratio = stored_chunks_/(cnr_hook_num * 1.0);
+				}
         long current_cnr_IOloads = cnr_IOloads - last_cnr_IOloads;
         long current_recipe_IOloads = recipe_IOloads- last_recipe_IOloads;
         long current_IOloads = IOloads - last_IOloads;
@@ -597,13 +606,22 @@ void HybridDedup::DoDedup() {
         long current_stored_chunks = stored_chunks_ - last_stored_chunks;
         double current_deduprate = current_total_chunks/(current_stored_chunks*1.0);
         double overall_deduprate = total_chunks_/(stored_chunks_*1.0);
-        cout<<"recipe_sample_ratio: "<<recipe_sample_ratio<<endl;
-				cout<<"cnr_sample_ratio: "<<cnr_sample_ratio<<endl;
-				cout<<"total windows: "<<t_win_num_<<" current windows: "<<cur_win<<endl;
-        cout<<"hook_hit:"<<hook_hit<<" cache hit:"<<cache_hit<<" cache miss:"<<cache_miss<<endl;
-        cout<<"current cnr_IO:"<<current_cnr_IOloads<<" overall cnr_IO:"<<cnr_IOloads<<endl;
-        cout<<"current recipe_IO:"<<current_recipe_IOloads<<" overall recipe_IO:"<<recipe_IOloads<<endl;
-        cout<<"current IOloads:"<<current_IOloads<<" overall IOloads:"<<IOloads<<endl;
-        cout<<"current deduprate:"<<current_deduprate<<" overall deduprate:"<<overall_deduprate<<endl<<endl;
+
+				if (g_debug_output) {
+        	cout<<"recipe_sample_ratio: "<<recipe_sample_ratio<<endl;
+					cout<<"cnr_sample_ratio: "<<cnr_sample_ratio<<endl;
+					cout<<"total windows: "<<t_win_num_<<" current windows: "<<cur_win<<endl;
+        	cout<<"hook_hit:"<<hook_hit<<" cache hit:"<<cache_hit<<" cache miss:"<<cache_miss<<endl;
+        	cout<<"current cnr_IO:"<<current_cnr_IOloads<<" overall cnr_IO:"<<cnr_IOloads<<endl;
+        	cout<<"current recipe_IO:"<<current_recipe_IOloads<<" overall recipe_IO:"<<recipe_IOloads<<endl;
+        	cout<<"current IOloads:"<<current_IOloads<<" overall IOloads:"<<IOloads<<endl;
+        	cout<<"current deduprate:"<<current_deduprate<<" overall deduprate:"<<overall_deduprate<<endl<<endl;
+			} else{
+				// output the regular results:
+				cout<<g_dedup_engine_no<<" "<<g_cache_size<<" "<<g_container_size<<" "<<g_window_size<<" "<<g_IO_cap<<" "<<cur_win<<" "<<t_win_num_<<" "
+						<<recipe_sample_ratio<<" "<<cnr_sample_ratio<<" "<<current_cnr_IOloads<<" "<<cnr_IOloads<<" "<<current_recipe_IOloads<<" "
+						<<recipe_IOloads<<" "<<current_IOloads<<" "<<IOloads<<" "<<current_total_chunks<<" "<<total_chunks_<<" "
+						<<current_stored_chunks<<" "<<stored_chunks_<<" "<<current_deduprate<<" "<<overall_deduprate<<"\n";
+			}
     }
 }

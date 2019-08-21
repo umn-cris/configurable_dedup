@@ -18,14 +18,21 @@ int main(int argc, char** argv) {
     if(!g_if_exact)
     {
 				if (g_if_hybrid) {
+					g_dedup_engine_no = 2;
 					HybridDedup dedup;
 					dedup.DoDedup();
 				} else {
+					if (g_only_cnr && !g_only_recipe) {
+						g_dedup_engine_no = 3;
+					} else {
+						g_dedup_engine_no = 4;
+					}
         	configurable_dedup dedup_process;
         	dedup_process.DoDedup();
 				}
 		}
 		else{
+				g_dedup_engine_no = 1;
         bloom_store bloombloom;
         bloombloom.DoDedup();
     }

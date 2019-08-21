@@ -43,6 +43,8 @@ extern long IOloads;
 extern long cnr_IOloads;
 extern long recipe_IOloads;
 extern long g_segmenting_bit_num;
+extern bool g_debug_output;
+extern long g_dedup_engine_no;
 int Parse(string cfgfile);
 
 typedef std::uint64_t hash_t;

@@ -21,6 +21,10 @@ long IOloads = 0;
 long cnr_IOloads=0;
 long recipe_IOloads=0;
 long g_segmenting_bit_num=0;
+bool g_debug_output=true;
+long g_dedup_engine_no=0;
+
+
 int Parse(string cfgfile){
     ifstream filestream(cfgfile, ios_base::in);
     if (filestream.fail()) {
@@ -83,6 +87,9 @@ int Parse(string cfgfile){
                 break;
 						case hash_("if_hybrid"):
 								g_if_hybrid = (value=="true");
+								break;
+						case hash_("debug_output"):
+								g_debug_output = (value=="true");
 								break;
             default:
                 cout<<"unknown cfg: "<<key<<endl;
