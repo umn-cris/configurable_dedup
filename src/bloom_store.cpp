@@ -19,38 +19,40 @@ void bloom_partition::PartitionDedup(chunk ck) {
 
     for(int i=0; i<BFs_.size(); i++){
         if(BFs_[i].key_may_match(ck.ID())){
-            if(i!=activeBF_) {
+            if(activeBF_.find(i)==activeBF_.end()) {
                 local_IOtimes_++;
-            }
-						/*
-            for(auto m:containers_[i].chunks_){
-                if(ck.ID() == m.ID()){
-                    return;
+                if(BFlist_.size()>=g_BFcache_size){
+                    activeBF_.erase(BFlist_.back());
+                    BFlist_.pop_back();
                 }
+                BFlist_.push_front(i);
+                activeBF_.emplace(i);
             }
-						*/
+             else{
+                 BFlist_.remove(i);
+                 BFlist_.push_front(i);
+            }
         }
     }
 		if (cache_.find(ck.ID()) != cache_.end()) {
 			return;
-		}		
+		}
     local_stored_chunks_++;
     //cout<<local_stored_chunks_<<endl;
-    if(!containers_[activeBF_].AppendChunk(ck)){
-        activeBF_++;
+    if(!containers_[curBF_].AppendChunk(ck)){
+        curBF_++;
         container cnr;
         containers_.push_back(cnr);
-        containers_[activeBF_].AppendChunk(ck);
+        containers_[curBF_].AppendChunk(ck);
         BloomFilter<string> bf(g_container_size,0.1);
         BFs_.push_back(bf);
     }
-
-		cache_.insert(ck.ID());
-    BFs_[activeBF_].insert(ck.ID());
+    cache_.insert(ck.ID());
+    BFs_[curBF_].insert(ck.ID());
 }
 
 long bloom_store::PartitionChunk(chunk ck) {
-    return (hash_(ck.ID().c_str()) % g_cache_size);
+    return (hash_(ck.ID().c_str()) % (g_cache_size/g_BFcache_size));
 }
 
 void bloom_store::DoDedup() {

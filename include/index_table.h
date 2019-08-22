@@ -62,7 +62,7 @@ public:
     list<meta_data> PickCandidates(const list<chunk>& features);
     list<meta_data> PickCandidatesFIFO(const list<chunk>& features);
 
-        void EraseHookTable(chunk ck);
+    void EraseHookTable(chunk ck);
     void PrintHookInfo(){
         cout<<"print hook info~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"<<endl;
         cout<<"hook size:"<<map_.size()<<endl;

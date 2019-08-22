@@ -15,10 +15,10 @@ class bloom_partition{
 private:
     vector<BloomFilter<string>> BFs_;
     vector<container> containers_;
-		unordered_set<string> cache_;
-    long activeBF_=0;
-    //container* current_cnr = new container(0,0,"container");
-
+    unordered_set<string> cache_;
+    list<long> BFlist_ ;
+    unordered_set<long> activeBF_;
+    long curBF_=0;
 public:
 
     long local_total_chunks_=0;

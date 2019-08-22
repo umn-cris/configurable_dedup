@@ -88,7 +88,6 @@ public:
     }
 
 private:
-
     vector<char> bits_;
     int32_t k_;
     int32_t m_;

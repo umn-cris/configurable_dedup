@@ -5,7 +5,10 @@ only_recipe false
 only_cnr false
 
 #unit subset/cache
-cache_size 64
+cache_size 128
+
+#each bloom store's partition has a number of cache
+BFcache_size 16
 
 #unit KB/chunk
 chunk_size 4
@@ -26,6 +29,8 @@ random_pick_ratio 64
 
 #segment ratio
 segmenting_bit_num 8
+
+debug_output false
 
 dedup_trace_dir ./trace/
 trace_summary_file summary.txt
