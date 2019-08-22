@@ -110,6 +110,7 @@ void HybridDedup::CDSegmenting( vector<chunk>& window, recipe* re,  list<recipe>
         }
     }
     segments->push_back(*re);
+		re->SetScore(cur_version_);
     Append2Recipes(re);
 }
 
@@ -249,10 +250,14 @@ list<meta_data> HybridDedup::SelectSubsetNO(unordered_map<string, HookItem*> hoo
 	for (auto it = hook_map.begin(); it!=hook_map.end(); it++) {
 		string id = it->second->ck_.ID();
 		for (auto i=it->second->recipe_hook.begin(); i!=it->second->recipe_hook.end(); i++) {
-			recipe_map[*i].insert(id);
+			if (cur_version_ - g_recipe_version_bound <= recipes_[*i].Score()) {
+				recipe_map[*i].insert(id);
+			}
 		}
 		for (auto i=it->second->recipe_ptr.begin(); i!=it->second->recipe_ptr.end(); i++) {
-			recipe_ptr_map[*i].insert(id);
+			if (cur_version_ - g_recipe_version_bound <= recipes_[*i].Score()) {
+				recipe_ptr_map[*i].insert(id);
+			}
 		}
 		for (auto i=it->second->cnr_hook.begin(); i!=it->second->cnr_hook.end(); i++) {
 			cnr_map[*i].insert(id);
@@ -503,6 +508,7 @@ void HybridDedup::DoDedup() {
 
 
         stringstream ss(trace_line);
+				cur_version_++;
         getline(ss, trace_name, ' ');
         string trace_path;
         trace_path = g_dedup_trace_dir + trace_name;
