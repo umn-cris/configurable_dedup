@@ -1,20 +1,20 @@
-if_exact true
+if_exact false
 if_hybrid false
 
 only_recipe false
-only_cnr false
+only_cnr true
 
 #unit subset/cache
-cache_size 64
+cache_size 256
 
 #unit KB/chunk
 chunk_size 4
 
 #unit chunks/container
-container_size 256
+container_size 1024
 
 #unit chunks/window
-window_size 2048
+window_size 4096
 
 #unit subset
 IO_cap 20
@@ -25,7 +25,13 @@ bit_num2 6
 random_pick_ratio 64
 
 #segment ratio
-segmenting_bit_num 8
+segmenting_bit_num 6
 
 dedup_trace_dir ./trace/
 trace_summary_file summary.txt
+
+#output mode
+debug_output false
+
+#recipe hook adjust bound, how many versions we need. 10000 is no limit
+recipe_version_bound 2

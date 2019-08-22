@@ -69,6 +69,7 @@ private:
 		long cur_cnr_hit_;
 		long cur_io_cap_;
 		long t_win_num_;
+		long cur_version_ = -1;
 
 public:
 
