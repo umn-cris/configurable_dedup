@@ -1,5 +1,5 @@
-if_exact false
-if_hybrid true
+if_exact true
+if_hybrid false
 
 only_recipe false
 only_cnr false
@@ -11,7 +11,7 @@ cache_size 128
 partition_number 16
 
 #each bloom store's partition has a number of cache
-BFcache_size 4
+BFcache_size 12
 
 #unit KB/chunk
 chunk_size 4
