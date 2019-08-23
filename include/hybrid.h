@@ -44,6 +44,10 @@ public:
         else
             return false;
     }
+
+		long GetIndexSize() {
+			return static_cast<long>(map_.size());
+		}
 		
 		void InsertRecipeHook(const chunk &ck);
     void InsertRecipeFeature(const chunk &ck);
