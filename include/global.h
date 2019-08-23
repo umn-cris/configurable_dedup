@@ -46,6 +46,7 @@ extern long g_segmenting_bit_num;
 extern bool g_debug_output;
 extern long g_dedup_engine_no;
 extern long g_BFcache_size;
+extern long g_partition_number;
 int Parse(string cfgfile);
 
 typedef std::uint64_t hash_t;

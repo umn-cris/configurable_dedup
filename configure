@@ -7,8 +7,11 @@ only_cnr false
 #unit subset/cache
 cache_size 128
 
+#partition number
+partition_number 16
+
 #each bloom store's partition has a number of cache
-BFcache_size 16
+BFcache_size 4
 
 #unit KB/chunk
 chunk_size 4

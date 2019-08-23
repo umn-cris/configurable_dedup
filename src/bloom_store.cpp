@@ -52,7 +52,7 @@ void bloom_partition::PartitionDedup(chunk ck) {
 }
 
 long bloom_store::PartitionChunk(chunk ck) {
-    return (hash_(ck.ID().c_str()) % (g_cache_size/g_BFcache_size));
+    return (hash_(ck.ID().c_str()) % g_partition_number);
 }
 
 void bloom_store::DoDedup() {
