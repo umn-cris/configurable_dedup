@@ -32,5 +32,8 @@ segmenting_bit_num 8
 
 debug_output false
 
+# to save the space, at most x versions we keep in hook table. if 10000, no limit.
+recipe_version_bound 1000
+
 dedup_trace_dir ./trace/
 trace_summary_file summary.txt

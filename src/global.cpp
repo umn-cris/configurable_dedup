@@ -12,7 +12,6 @@ long g_chunk_size=0;
 long g_window_size=0;
 long g_container_size=0;
 long g_IO_cap=0;
-long g_BFcache_size=0;
 string g_dedup_trace_dir;
 string g_trace_summary_file;
 long g_bit_num1=0;
@@ -24,6 +23,7 @@ long recipe_IOloads=0;
 long g_segmenting_bit_num=0;
 bool g_debug_output=true;
 long g_dedup_engine_no=0;
+long g_recipe_version_bound = 10000;
 
 
 int Parse(string cfgfile){
@@ -77,9 +77,6 @@ int Parse(string cfgfile){
             case hash_("segmenting_bit_num"):
                 g_segmenting_bit_num = stol(value);
                 break;
-            case hash_("BFcache_size"):
-                g_BFcache_size = stol(value);
-                break;
             case hash_("only_cnr"):
                 g_only_cnr = (value=="true");
                 break;
@@ -89,12 +86,15 @@ int Parse(string cfgfile){
             case hash_("if_exact"):
                 g_if_exact = (value=="true");
                 break;
-            case hash_("if_hybrid"):
-                    g_if_hybrid = (value=="true");
-                    break;
-            case hash_("debug_output"):
-                    g_debug_output = (value=="true");
-                    break;
+						case hash_("if_hybrid"):
+								g_if_hybrid = (value=="true");
+								break;
+						case hash_("debug_output"):
+								g_debug_output = (value=="true");
+								break;
+						case hash_("recipe_version_bound"):
+								g_recipe_version_bound = stol(value);
+								break;						
             default:
                 cout<<"unknown cfg: "<<key<<endl;
                 return -1;
