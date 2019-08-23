@@ -34,6 +34,7 @@ extern long g_chunk_size;
 extern long g_window_size;
 extern long g_container_size;
 extern long g_IO_cap;
+extern long g_BFcache_size;
 extern string g_dedup_trace_dir;
 extern string g_trace_summary_file;
 extern long g_bit_num1;

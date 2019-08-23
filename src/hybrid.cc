@@ -484,8 +484,10 @@ void HybridDedup::DoDedup() {
     container* current_cnr = new container(0,0,"container");
     recipe* current_recipe = new recipe(0,0,"recipe");
     list<recipe>* segments_= new list<recipe>;
+		vector<long> version_recipe_hook_num;
 		t_win_num_ = 0;
 		long recipe_hook_num = 0;
+		long last_recipe_hook_num = 0;
 		long cnr_hook_num = 0;
 
     string trace_sum, trace_name, trace_line;
@@ -581,6 +583,7 @@ void HybridDedup::DoDedup() {
 									if(IfHook(*m)) {
                 		m->Cnr_or_Recipe(true);
                   	index_.InsertCNRHook(*m);
+										cnr_hook_num++;
                 	}
                 }
 								if(IfHook(*m)) {
@@ -613,10 +616,22 @@ void HybridDedup::DoDedup() {
         double current_deduprate = current_total_chunks/(current_stored_chunks*1.0);
         double overall_deduprate = total_chunks_/(stored_chunks_*1.0);
 
+				version_recipe_hook_num.push_back(recipe_hook_num-last_recipe_hook_num);
+				last_recipe_hook_num = recipe_hook_num;
+				long stored_recipe_hook_num=0, version_count = g_recipe_version_bound;
+				for(long i = version_recipe_hook_num.size() - 1; i>=0; i--) {
+					stored_recipe_hook_num +=version_recipe_hook_num[i];
+					version_count--;
+					if(version_count<0) {
+						break;
+					}
+				}
+
 				if (g_debug_output) {
         	cout<<"recipe_sample_ratio: "<<recipe_sample_ratio<<endl;
 					cout<<"cnr_sample_ratio: "<<cnr_sample_ratio<<endl;
 					cout<<"total windows: "<<t_win_num_<<" current windows: "<<cur_win<<endl;
+					cout<<"total FP: "<<index_.GetIndexSize()<<" total pointers: "<<recipe_hook_num+cnr_hook_num<<" stored recipe hooks: "<<stored_recipe_hook_num<<endl;
         	cout<<"hook_hit:"<<hook_hit<<" cache hit:"<<cache_hit<<" cache miss:"<<cache_miss<<endl;
         	cout<<"current cnr_IO:"<<current_cnr_IOloads<<" overall cnr_IO:"<<cnr_IOloads<<endl;
         	cout<<"current recipe_IO:"<<current_recipe_IOloads<<" overall recipe_IO:"<<recipe_IOloads<<endl;
@@ -625,6 +640,7 @@ void HybridDedup::DoDedup() {
 			} else{
 				// output the regular results:
 				cout<<g_dedup_engine_no<<" "<<g_cache_size<<" "<<g_container_size<<" "<<g_window_size<<" "<<g_IO_cap<<" "<<cur_win<<" "<<t_win_num_<<" "
+						<<index_.GetIndexSize()<<" "<<stored_recipe_hook_num<<" "<<cnr_hook_num<<" "<<stored_recipe_hook_num+cnr_hook_num<<" "
 						<<recipe_sample_ratio<<" "<<cnr_sample_ratio<<" "<<current_cnr_IOloads<<" "<<cnr_IOloads<<" "<<current_recipe_IOloads<<" "
 						<<recipe_IOloads<<" "<<current_IOloads<<" "<<IOloads<<" "<<current_total_chunks<<" "<<total_chunks_<<" "
 						<<current_stored_chunks<<" "<<stored_chunks_<<" "<<current_deduprate<<" "<<overall_deduprate<<"\n";

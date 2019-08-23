@@ -1,5 +1,5 @@
-if_exact true
-if_hybrid false
+if_exact false
+if_hybrid true
 
 only_recipe false
 only_cnr false
@@ -33,7 +33,7 @@ segmenting_bit_num 8
 debug_output false
 
 # to save the space, at most x versions we keep in hook table. if 10000, no limit.
-recipe_version_bound 1000
+recipe_version_bound 0
 
 dedup_trace_dir ./trace/
 trace_summary_file summary.txt
