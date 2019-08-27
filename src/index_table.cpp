@@ -209,3 +209,8 @@ void lru_cache::Evict() {
         lru_cache_.pop_back();
     }
 }
+
+void lru_cache::Flush() {
+    map_.clear();
+    lru_cache_.clear();
+}

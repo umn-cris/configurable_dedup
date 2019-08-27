@@ -594,7 +594,8 @@ void HybridDedup::DoDedup() {
                 m++;
               }
             }
-				}
+            cache_.Flush();
+        }
 
         IOloads = cnr_IOloads+recipe_IOloads;
 				double recipe_sample_ratio, cnr_sample_ratio;

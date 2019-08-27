@@ -120,5 +120,6 @@ public:
 
     bool Load(const meta_data value);
     void Evict();
+    void Flush();
 };
 #endif //CONFIGURABLE_DEDUP_INDEX_TABLE_H
