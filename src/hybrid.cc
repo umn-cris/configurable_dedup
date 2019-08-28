@@ -76,8 +76,14 @@ bool HybridDedup::Append2Recipes(recipe* re) {
     return true;
 }
 
-bool HybridDedup::IsBoundary(chunk ck) {
-    return sampler_.PositiveFeatures(ck,g_segmenting_bit_num);
+bool HybridDedup::IsBoundary(chunk ck, long num) {
+    //if(sampler_.Segmenting(ck,g_segmenting_bit_num)) return true;
+    if(g_segmenting_bit_num==0){
+        if(num>0 && num%g_segment_size==0) return true;
+    }else{
+        if(sampler_.PositiveFeatures(ck,g_segmenting_bit_num)) return true;
+    }
+    return false;
 }
 
 void HybridDedup::LoadSubset2cache(const list<meta_data> candidates) {
@@ -101,7 +107,7 @@ void HybridDedup::LoadSubset2cache(const list<meta_data> candidates) {
         */
 void HybridDedup::CDSegmenting( vector<chunk>& window, recipe* re,  list<recipe>* segments) {
     for (int i = 0; i < window.size(); ++i) {
-        if(IsBoundary(window[i])){
+        if(IsBoundary(window[i],i)){
             re->SetSequenceNumber(sequence_number_);
             segments->push_back(*re);
             Append2Recipes(re);

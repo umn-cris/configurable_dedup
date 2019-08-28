@@ -26,7 +26,7 @@ bool g_debug_output=true;
 long g_dedup_engine_no=0;
 long g_partition_number=0;
 long g_recipe_version_bound = 10000;
-
+long g_segment_size=1024;
 
 int Parse(string cfgfile){
     ifstream filestream(cfgfile, ios_base::in);
@@ -102,6 +102,9 @@ int Parse(string cfgfile){
                 break;
             case hash_("partition_number"):
                 g_partition_number = stol(value);
+                break;
+            case hash_("segment_size"):
+                g_segment_size = stol(value);
                 break;
             default:
                 cout<<"unknown cfg: "<<key<<endl;

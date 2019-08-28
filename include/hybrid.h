@@ -81,7 +81,7 @@ public:
     bool Append2Containers(container* cnr);
     bool Append2Recipes(recipe* re);
     void CDSegmenting( vector<chunk>& window, recipe* re, list<recipe>* segments);
-    bool IsBoundary(chunk ck);
+    bool IsBoundary(chunk ck,long num);
     void LoadSubset2cache(const list<meta_data> candidates);
 		bool IfHook(const chunk& ck);
     bool IfFeature(const chunk& ck);

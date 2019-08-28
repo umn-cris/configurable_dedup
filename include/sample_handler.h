@@ -10,6 +10,7 @@ public:
     bool PositiveFeatures(const chunk& ck, long bit_num);
     bool NegativeFeatures(const chunk& ck, long bit_num);
     bool RandomPickFeature(const chunk& ck, long sample_ratio);
+    bool Segmenting(const chunk& ck, long bit_num);
 };
 
 

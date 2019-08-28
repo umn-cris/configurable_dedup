@@ -21,6 +21,23 @@ bool sample_handler::NegativeFeatures(const chunk& ck, long bit_num) {
     else return false;
 
 }
+bool sample_handler::Segmenting(const chunk& ck, long bit_num) {
+    if(bit_num==0){
+        return false;
+    }
+    bitset<48> bits(stoll(ck.ID(), nullptr, 16));
+    for (int j = 0; j < bit_num; ++j) {
+        if(!bits[j]) {
+            return false;
+        }
+    }
+    for (int j = bit_num; j < bit_num+bit_num; ++j) {
+        if(bits[j]) {
+            return false;
+        }
+    }
+
+}
 bool sample_handler::PositiveFeatures(const chunk& ck, long bit_num) {
     if(bit_num==0){
         return false;

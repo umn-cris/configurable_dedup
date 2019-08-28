@@ -1,8 +1,8 @@
 if_exact false
-if_hybrid true
+if_hybrid false
 
 
-only_recipe false
+only_recipe true
 only_cnr false
 
 #unit subset/cache
@@ -27,17 +27,19 @@ window_size 4096
 IO_cap 6
 
 #sample ratio
-bit_num1 6
-bit_num2 6
+bit_num1 8
+bit_num2 8
 random_pick_ratio 32
 
 #segment ratio
-segmenting_bit_num 6
+segmenting_bit_num 0
+#segment number
+segment_size 1024
 
 debug_output false
 
 # to save the space, at most x versions we keep in hook table. if 10000, no limit.
-recipe_version_bound 0
+recipe_version_bound 2
 
 dedup_trace_dir ./trace/
 trace_summary_file summary.txt
