@@ -7,23 +7,21 @@
 
 
 class meta_data{
-    long chunk_num_=0;
     long name_=0;
     bool if_cnr_= true;
     long score_=0;
     long sequence_number_=0;
 public:
-    void Set(long chunk_num,long name, string location){
-        chunk_num_=chunk_num;
+    void Set(long name, string location){
         name_ =name;
         if(location=="recipe")
             if_cnr_=false;
         if(location=="container")
             if_cnr_=true;
     }
-    void NumInc(){
+    /*oid NumInc(){
         chunk_num_++;
-    }
+    }*/
     void NameInc(){
         name_++;
     }
@@ -59,9 +57,9 @@ public:
     bool operator <(meta_data d2){
         return (this->Name() < d2.Name());
     }
-		long GetChunkNum() {
+		/*long GetChunkNum() {
 			return chunk_num_;
-		}
+		}*/
 };
 
 class chunk{
@@ -124,20 +122,20 @@ public:
     subset(){}
     ~subset(){}
     subset(long chunk_num,long name, string location){
-        meta_.Set(chunk_num, name, location);
+        meta_.Set(name, location);
     }
 
     bool AppendChunk(chunk& ck){
         if(!Meta().IfCnr()){
             ck.SetRecipeName(Name());
             chunks_.push_back(ck);
-            meta_.NumInc();
+            //meta_.NumInc();
             return true;
         }else{
             if(chunks_.size()<g_container_size){
                 ck.SetCnrName(Name());
                 chunks_.push_back(ck);
-                meta_.NumInc();
+                //meta_.NumInc();
                 return true;
             }
             return false;
@@ -177,9 +175,9 @@ public:
     void IndicateRecipe(){
         meta_.IndicateRecipe();
     }
-		long GetChunkNum() {
+		/*long GetChunkNum() {
 			return meta_.GetChunkNum();
-		}
+		}*/
 };
 
 class container: public subset{

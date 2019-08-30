@@ -600,7 +600,7 @@ void HybridDedup::DoDedup() {
                 m++;
               }
             }
-            cache_.Flush();
+            //cache_.Flush();
         }
 
         IOloads = cnr_IOloads+recipe_IOloads;

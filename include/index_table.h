@@ -19,7 +19,6 @@ public:
 class hook_entry{
 public:
     hook_entry(){}
-    chunk ck_;
     list<meta_data> candidates_; //subset score & subset's metadata
 
 };
