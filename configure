@@ -2,8 +2,8 @@ if_exact false
 if_hybrid false
 
 
-only_recipe true
-only_cnr false
+only_recipe false
+only_cnr true
 
 #unit subset/cache
 cache_size 128

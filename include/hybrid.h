@@ -16,7 +16,6 @@
 
 class HookItem{
 public:
-    chunk ck_;
 		list<long> recipe_hook; //the ptr to the recipe uniform hooks only
 		list<long> cnr_hook;
     list<long> recipe_ptr;  // for selection use
@@ -49,10 +48,10 @@ public:
 			return static_cast<long>(map_.size());
 		}
 		
-		void InsertRecipeHook(const chunk &ck);
-    void InsertRecipeFeature(const chunk &ck);
-		void InsertCNRHook(const chunk &ck);
-    void InsertCNRFeature(const chunk &ck);
+		void InsertRecipeHook(const chunk &ck, long recipe_name);
+    void InsertRecipeFeature(const chunk &ck, long recipe_name);
+		void InsertCNRHook(const chunk &ck, long cnr_name);
+    void InsertCNRFeature(const chunk &ck, long cnr_name);
 		void EraseHookTable(chunk ck);
 		void EraseChunk(chunk ck){
         EraseHookTable(ck);
