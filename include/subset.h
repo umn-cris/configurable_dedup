@@ -64,20 +64,20 @@ public:
 
 class chunk{
     string chunk_id_;
-    long size_=0;
+    //long size_=0;
     long cnr_name_=-1;
     long recipe_name_=-1;
     bool if_cnr_=false;
 public:
     chunk(){
-        size_=0;
+        //size_=0;
         cnr_name_=-1;
         recipe_name_=-1;
         if_cnr_= false;
     }
     chunk(const chunk &value){
         chunk_id_=value.chunk_id_;
-        size_=value.size_;
+        //size_=value.size_;
         cnr_name_=value.cnr_name_;
         recipe_name_=value.recipe_name_;
         if_cnr_=value.if_cnr_;
@@ -87,7 +87,7 @@ public:
         chunk_id_=id;
     }
     void SetSize(long size){
-        size_=size;
+        //size_=size;
     }
     void SetCnrName(long name){
         cnr_name_=name;
