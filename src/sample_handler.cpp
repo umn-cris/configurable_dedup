@@ -44,12 +44,7 @@ bool sample_handler::PositiveFeatures(const chunk& ck, long bit_num) {
     }
     bool is_hook = true;
     bitset<48> bits(stoll(ck.ID(), nullptr, 16));
-    if(bit_num>20) cout<<"too much bit num"<<endl;
-    /*if(bit_num>8){
-        bit_num += 4;
-    }*/
     for (int j = 0; j < bit_num; ++j) {
-
         if(!bits[j]) {
             is_hook= false;
             break;
