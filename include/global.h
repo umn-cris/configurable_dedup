@@ -29,6 +29,7 @@ extern bool g_if_exact;
 extern bool g_if_hybrid;
 extern bool g_only_cnr;
 extern bool g_only_recipe;
+extern bool g_if_flush;
 extern long g_cache_size;
 extern long g_chunk_size;
 extern long g_window_size;

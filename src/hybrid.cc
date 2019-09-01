@@ -7,6 +7,7 @@
 #include <set>
 #include <algorithm>
 #include <cmath>
+int iii=1;
 
 void HookIndex::InsertRecipeHook(const chunk &ck, long recipe_name) {
 	HookItem* entry;
@@ -118,11 +119,12 @@ void HybridDedup::CDSegmenting( vector<chunk>& window, recipe* re,  list<recipe>
 
 bool HybridDedup::IfHook(const chunk& ck) {
 	if(sampler_.PositiveFeatures(ck,g_bit_num1)){
+	    cout<<iii++<<endl;
         return true;
     }
 	if(sampler_.NegativeFeatures(ck,g_bit_num2)){
-	    cout<<"true"<<endl;
-        return true;
+        cout<<iii++<<endl;
+	    return true;
     }
 	return false;
 }
@@ -597,7 +599,7 @@ void HybridDedup::DoDedup() {
                 m++;
               }
             }
-            //cache_.Flush();
+            if(g_if_flush) cache_.Flush();
         }
 
         IOloads = cnr_IOloads+recipe_IOloads;

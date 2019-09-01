@@ -7,6 +7,7 @@ bool g_if_exact=false;
 bool g_if_hybrid=false;
 bool g_only_cnr=false;
 bool g_only_recipe=false;
+bool g_if_flush=false;
 long g_cache_size=0;
 long g_chunk_size=0;
 long g_window_size=0;
@@ -105,6 +106,9 @@ int Parse(string cfgfile){
                 break;
             case hash_("segment_size"):
                 g_segment_size = stol(value);
+                break;
+            case hash_("if_flush"):
+                g_if_flush = (value=="true");
                 break;
             default:
                 cout<<"unknown cfg: "<<key<<endl;
