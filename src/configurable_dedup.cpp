@@ -23,9 +23,13 @@ bool configurable_dedup::Append2Recipes(recipe* re) {
     return true;
 }
 
-bool configurable_dedup::IsBoundary(chunk ck) {
-    return sampler_.PositiveFeatures(ck,g_segmenting_bit_num);
-}
+bool configurable_dedup::IsBoundary(chunk ck, long num) {
+    if(g_segmenting_bit_num==0){
+        if(num>0 && num%g_segment_size==0) return true;
+    }else{
+        if(sampler_.PositiveFeatures(ck,g_segmenting_bit_num)) return true;
+    }
+    return false;}
 
 void configurable_dedup::Load2cache(const list<chunk>& features) {
     list<meta_data> candidates = hooks_.PickCandidates(features);
@@ -43,7 +47,7 @@ void configurable_dedup::Load2cache(const list<chunk>& features) {
         */
 void configurable_dedup::CDSegmenting( vector<chunk>& window, recipe* re,  list<recipe>* segments) {
     for (int i = 0; i < window.size(); ++i) {
-        if(IsBoundary(window[i])){
+        if(IsBoundary(window[i],i)){
             re->SetSequenceNumber(sequence_number_);
             segments->push_back(*re);
             Append2Recipes(re);
@@ -157,7 +161,7 @@ void configurable_dedup::DoDedup(){
                 }
             }
             Append2Containers(current_cnr);
-
+            if(g_if_flush) cache_.Flush();
         }
         //for(auto n:recipes_) cout<<n.Name()<<" "<<n.Score()<<" "<<n.SequenceNumber()<<endl;
 

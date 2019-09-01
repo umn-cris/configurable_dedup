@@ -24,7 +24,7 @@ public:
     bool Append2Containers(container* cnr);
     bool Append2Recipes(recipe* re);
     void CDSegmenting( vector<chunk>& window, recipe* re, list<recipe>* segments);
-    bool IsBoundary(chunk ck);
+    bool IsBoundary(chunk ck, long num);
     void Load2cache(const list<chunk>& features);
     bool IfFeature(const chunk& ck){
 		if (!g_only_recipe) {
