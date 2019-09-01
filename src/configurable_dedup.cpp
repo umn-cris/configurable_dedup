@@ -107,8 +107,6 @@ void configurable_dedup::DoDedup(){
 						t_win_num_++;
             segments_->clear();
             CDSegmenting(window_,current_recipe,segments_);
-            list<chunk> recipe_features;
-            list<chunk> cnr_features;
             list<chunk> hitted_hooks;
 
             for(auto n:*segments_){
@@ -137,7 +135,7 @@ void configurable_dedup::DoDedup(){
                     //cout<<m->ID()<<endl;
                    if(IfFeature(*m) && !g_only_cnr) {
                          m->Cnr_or_Recipe(false);
-                         recipe_features.push_back(*m);
+                         hooks_.InsertRecipeFeatures(*m, n.Name());
 												 recipe_hook_num++;
                    }
                    if(cache_.LookUp(*m)){
@@ -150,21 +148,16 @@ void configurable_dedup::DoDedup(){
                             current_cnr->AppendChunk(*m);
                         }
 
-						if(IfFeature(*m) && !g_only_recipe) {
-								m->Cnr_or_Recipe(true);
-								cnr_features.push_back(*m);
-								cnr_hook_num++;
-						}
+												if(IfFeature(*m) && !g_only_recipe) {
+													m->Cnr_or_Recipe(true);
+													hooks_.InsertCnrFeatures(*m, current_cnr->Meta());
+													cnr_hook_num++;
+												}
                    }
                    m++;
                 }
             }
             Append2Containers(current_cnr);
-
-
-            /*4. update hooktable*/
-            hooks_.InsertCnrFeatures(cnr_features);
-            hooks_.InsertRecipeFeatures(recipe_features);
 
         }
         //for(auto n:recipes_) cout<<n.Name()<<" "<<n.Score()<<" "<<n.SequenceNumber()<<endl;

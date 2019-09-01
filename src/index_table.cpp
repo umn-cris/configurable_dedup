@@ -131,32 +131,26 @@ list<meta_data> hook_table::PickCandidatesFIFO(const list<chunk>& features) {
     return candidates;
 }
 
-void hook_table::InsertRecipeFeatures(const list<chunk>& cks) {
-    for(auto n:cks){
+void hook_table::InsertRecipeFeatures(const chunk &cks, long recipe_name) {
         hook_entry* entry;
-        if (LookUp(n.ID(),&entry)) {
-            entry->candidates_.push_back(recipes_[n.RecipeName()].Meta());
+        if (LookUp(cks.ID(),&entry)) {
+            entry->candidates_.push_back(recipes_[recipe_name].Meta());
         } else {
             hook_entry tmp_entry;
-            tmp_entry.ck_ = n;
-            tmp_entry.candidates_.push_back(recipes_[n.RecipeName()].Meta());
-            map_.emplace(n.ID(),tmp_entry);
+            tmp_entry.candidates_.push_back(recipes_[recipe_name].Meta());
+            map_.emplace(cks.ID(),tmp_entry);
         }
-    }
 }
 
-void hook_table::InsertCnrFeatures(const list<chunk> &cks) {
-    for(auto n:cks){
+void hook_table::InsertCnrFeatures(const chunk &cks, meta_data meta) {
         hook_entry* entry;
-        if (LookUp(n.ID(),&entry)) {
-            entry->candidates_.push_back(containers_[n.CnrName()].Meta());
+        if (LookUp(cks.ID(),&entry)) {
+            entry->candidates_.push_back(meta);
         } else {
             hook_entry tmp_entry;
-            tmp_entry.ck_ = n;
-            tmp_entry.candidates_.push_back(containers_[n.CnrName()].Meta());
-            map_.emplace(n.ID(),tmp_entry);
+            tmp_entry.candidates_.push_back(meta);
+            map_.emplace(cks.ID(),tmp_entry);
         }
-    }
 }
 void hook_table::EraseHookTable(chunk ck) {}
 

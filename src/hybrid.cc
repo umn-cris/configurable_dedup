@@ -8,54 +8,50 @@
 #include <algorithm>
 #include <cmath>
 
-void HookIndex::InsertRecipeHook(const chunk &ck) {
+void HookIndex::InsertRecipeHook(const chunk &ck, long recipe_name) {
 	HookItem* entry;
 	//cout<<"add recipe hook: "<<ck.ID()<<endl;
   if (LookUp(ck.ID(),&entry)) {
-  	entry->recipe_hook.push_back(ck.RecipeName());
+  	entry->recipe_hook.push_back(recipe_name);
   } else {
     HookItem tmp_entry;
-    tmp_entry.ck_ = ck;
-    tmp_entry.recipe_hook.push_back(ck.RecipeName());
+    tmp_entry.recipe_hook.push_back(recipe_name);
     map_.emplace(ck.ID(),tmp_entry);
   }
 }
 
-void HookIndex::InsertRecipeFeature(const chunk &ck) {
+void HookIndex::InsertRecipeFeature(const chunk &ck, long recipe_name) {
 	HookItem* entry;
 	//cout<<"add recipe feature: "<<ck.ID()<<endl;
   if (LookUp(ck.ID(),&entry)) {
-  	entry->recipe_ptr.push_back(ck.RecipeName());
+  	entry->recipe_ptr.push_back(recipe_name);
   } else {
     HookItem tmp_entry;
-    tmp_entry.ck_ = ck;
-    tmp_entry.recipe_ptr.push_back(ck.RecipeName());
+    tmp_entry.recipe_ptr.push_back(recipe_name);
     map_.emplace(ck.ID(),tmp_entry);
   }
 }
 
-void HookIndex::InsertCNRHook(const chunk &ck) {
+void HookIndex::InsertCNRHook(const chunk &ck, long cnr_name) {
 	HookItem* entry;
 	//cout<<"add cnr feature: "<<ck.ID()<<endl;
   if (LookUp(ck.ID(),&entry)) {
-     entry->cnr_hook.push_back(ck.CnrName());
+     entry->cnr_hook.push_back(cnr_name);
   } else {
      HookItem tmp_entry;
-     tmp_entry.ck_ = ck;
-     tmp_entry.cnr_hook.push_back(ck.CnrName());
+     tmp_entry.cnr_hook.push_back(cnr_name);
      map_.emplace(ck.ID(),tmp_entry);
   }
 }
 
-void HookIndex::InsertCNRFeature(const chunk &ck) {
+void HookIndex::InsertCNRFeature(const chunk &ck, long cnr_name) {
 	HookItem* entry;
 	//cout<<"add cnr feature: "<<ck.ID()<<endl;
   if (LookUp(ck.ID(),&entry)) {
-     entry->cnr_ptr.push_back(ck.CnrName());
+     entry->cnr_ptr.push_back(cnr_name);
   } else {
      HookItem tmp_entry;
-     tmp_entry.ck_ = ck;
-     tmp_entry.cnr_ptr.push_back(ck.CnrName());
+     tmp_entry.cnr_ptr.push_back(cnr_name);
      map_.emplace(ck.ID(),tmp_entry);
   }
 }
@@ -141,14 +137,13 @@ bool HybridDedup::IfFeature(const chunk& ck) {
 /*The dense based design$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$*/
 list<meta_data> HybridDedup::SelectSubsetDense(unordered_map<string, HookItem*> hook_map) {
 	list<meta_data> selected_subsets;
-	
+	/*
 	unordered_map<long, set<string>> recipe_map;  //the map from recipe to its hitted hook chunk id
 	unordered_map<long, set<string>> recipe_ptr_map;
 	unordered_map<long, set<string>> cnr_ptr_map;
 
-	/*first, insert the mapping of recipe->hookset*/
 	for (auto it = hook_map.begin(); it!=hook_map.end(); it++) {
-		string id = it->second->ck_.ID();
+		string id = it->first;
 		for (auto i=it->second->recipe_hook.begin(); i!=it->second->recipe_hook.end(); i++) {
 			recipe_map[*i].insert(id);
 		}
@@ -163,7 +158,6 @@ list<meta_data> HybridDedup::SelectSubsetDense(unordered_map<string, HookItem*> 
 	cur_cnr_hit_ = cnr_ptr_map.size();
 	total_cnr_hit_ += cur_cnr_hit_;
 
-	/*second, select the recipe candidates*/
 	long k=static_cast<long>(recipe_map.size());
 	vector<long> recipe_selected(k, -1);
 	list<meta_data> recipe_cans;
@@ -194,7 +188,6 @@ list<meta_data> HybridDedup::SelectSubsetDense(unordered_map<string, HookItem*> 
 		
 	}
 
-	/*Third, exclude the hooks in the selected recipe segments*/
 	long num = min(5, static_cast<int>(k));
 	for (long i=0; i < num; i++) {
 		if (recipe_selected[i] != -1) {
@@ -212,7 +205,6 @@ list<meta_data> HybridDedup::SelectSubsetDense(unordered_map<string, HookItem*> 
 	}
 
 
-	/*forth, select the cnr candidates*/
 	long h=static_cast<long>(cnr_ptr_map.size());
 	vector<long> cnr_selected(h, -1);
 	list<meta_data> cnr_cans;	
@@ -243,7 +235,7 @@ list<meta_data> HybridDedup::SelectSubsetDense(unordered_map<string, HookItem*> 
 			cnr_ptr_map.erase(cnr_selected[i]);
 		}
 	}
-    
+  */
 	return selected_subsets; 
 }
 
@@ -259,7 +251,7 @@ list<meta_data> HybridDedup::SelectSubsetNO(unordered_map<string, HookItem*> hoo
 
 	/*first, insert the mapping of recipe->hookset*/
 	for (auto it = hook_map.begin(); it!=hook_map.end(); it++) {
-		string id = it->second->ck_.ID();
+		string id = it->first;
 		for (auto i=it->second->recipe_hook.begin(); i!=it->second->recipe_hook.end(); i++) {
 			if (cur_version_ - g_recipe_version_bound <= recipes_[*i].Score()) {
 				recipe_map[*i].insert(id);
@@ -372,7 +364,7 @@ list<meta_data> HybridDedup::SelectSubset(unordered_map<string, HookItem*> hook_
 
 	/*first, insert the mapping of recipe->hookset*/
 	for (auto it = hook_map.begin(); it!=hook_map.end(); it++) {
-		string id = it->second->ck_.ID();
+		string id = it->first;
 		for (auto i=it->second->recipe_hook.begin(); i!=it->second->recipe_hook.end(); i++) {
 			recipe_map[*i].insert(id);
 		}
@@ -587,19 +579,19 @@ void HybridDedup::DoDedup() {
                   }
 									if(IfFeature(*m) && !g_only_recipe) {
 										m->Cnr_or_Recipe(true);
-										index_.InsertRecipeFeature(*m);
-										index_.InsertCNRFeature(*m);
+										index_.InsertRecipeFeature(*m, n.Name());
+										index_.InsertCNRFeature(*m, current_cnr->Name());
 										cnr_hook_num++;
 									}
 									if(IfHook(*m)) {
                 		m->Cnr_or_Recipe(true);
-                  	index_.InsertCNRHook(*m);
+                  	index_.InsertCNRHook(*m, current_cnr->Name());
 										cnr_hook_num++;
                 	}
                 }
 								if(IfHook(*m)) {
                 	m->Cnr_or_Recipe(false);
-                  index_.InsertRecipeHook(*m);
+                  index_.InsertRecipeHook(*m, n.Name());
 									recipe_hook_num++;
                 }
                 m++;

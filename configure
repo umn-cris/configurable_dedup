@@ -1,8 +1,8 @@
 if_exact false
-if_hybrid true
+if_hybrid false
 
 
-only_recipe false
+only_recipe true
 only_cnr false
 
 #unit subset/cache
@@ -27,8 +27,8 @@ window_size 4096
 IO_cap 6
 
 #sample ratio
-bit_num1 0
-bit_num2 16
+bit_num1 8
+bit_num2 8
 random_pick_ratio 32
 
 #segment ratio

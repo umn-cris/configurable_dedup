@@ -67,21 +67,21 @@ public:
 class chunk{
     string chunk_id_;
     long size_=0;
-    long cnr_name_=-1;
-    long recipe_name_=-1;
+    //long cnr_name_=-1;
+    //long recipe_name_=-1;
     bool if_cnr_=false;
 public:
     chunk(){
         size_=0;
-        cnr_name_=-1;
-        recipe_name_=-1;
+        //cnr_name_=-1;
+        //recipe_name_=-1;
         if_cnr_= false;
     }
     chunk(const chunk &value){
         chunk_id_=value.chunk_id_;
         size_=value.size_;
-        cnr_name_=value.cnr_name_;
-        recipe_name_=value.recipe_name_;
+        //cnr_name_=value.cnr_name_;
+        //recipe_name_=value.recipe_name_;
         if_cnr_=value.if_cnr_;
     }
     ~chunk(){};
@@ -91,12 +91,14 @@ public:
     void SetSize(long size){
         size_=size;
     }
+/*
     void SetCnrName(long name){
         cnr_name_=name;
     }
     void SetRecipeName(long name){
         recipe_name_=name;
     }
+*/
     string ID()const{
         return chunk_id_;
     }
@@ -106,7 +108,7 @@ public:
     void Cnr_or_Recipe(bool if_cnr){
         if_cnr_=if_cnr;
     }
-
+/*
     long CnrName()const{
         return cnr_name_;
     }
@@ -114,6 +116,7 @@ public:
     long RecipeName()const{
         return recipe_name_;
     }
+*/
 };
 
 class subset{
@@ -129,13 +132,13 @@ public:
 
     bool AppendChunk(chunk& ck){
         if(!Meta().IfCnr()){
-            ck.SetRecipeName(Name());
+            //ck.SetRecipeName(Name());
             chunks_.push_back(ck);
             meta_.NumInc();
             return true;
         }else{
             if(chunks_.size()<g_container_size){
-                ck.SetCnrName(Name());
+                //ck.SetCnrName(Name());
                 chunks_.push_back(ck);
                 meta_.NumInc();
                 return true;
