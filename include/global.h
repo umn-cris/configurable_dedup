@@ -50,6 +50,7 @@ extern long g_dedup_engine_no;
 extern long g_BFcache_size;
 extern long g_partition_number;
 extern long g_recipe_version_bound;
+extern string g_selection_policy;
 
 int Parse(string cfgfile);
 

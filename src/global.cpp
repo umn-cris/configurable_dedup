@@ -28,6 +28,7 @@ long g_dedup_engine_no=0;
 long g_partition_number=0;
 long g_recipe_version_bound = 10000;
 long g_segment_size=1024;
+string g_selection_policy="level";
 
 int Parse(string cfgfile){
     ifstream filestream(cfgfile, ios_base::in);
@@ -110,6 +111,9 @@ int Parse(string cfgfile){
             case hash_("if_flush"):
                 g_if_flush = (value=="true");
                 break;
+            case hash_("selection_policy"):
+				g_selection_policy = value;
+				break;
             default:
                 cout<<"unknown cfg: "<<key<<endl;
                 return -1;
