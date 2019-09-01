@@ -142,13 +142,13 @@ void hook_table::InsertRecipeFeatures(const chunk &cks, long recipe_name) {
         }
 }
 
-void hook_table::InsertCnrFeatures(const chunk &cks, long cnr_name) {
+void hook_table::InsertCnrFeatures(const chunk &cks, meta_data meta) {
         hook_entry* entry;
         if (LookUp(cks.ID(),&entry)) {
-            entry->candidates_.push_back(containers_[cnr_name].Meta());
+            entry->candidates_.push_back(meta);
         } else {
             hook_entry tmp_entry;
-            tmp_entry.candidates_.push_back(containers_[cnr_name].Meta());
+            tmp_entry.candidates_.push_back(meta);
             map_.emplace(cks.ID(),tmp_entry);
         }
 }

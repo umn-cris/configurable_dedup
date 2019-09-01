@@ -51,7 +51,7 @@ public:
     }
 
     void InsertRecipeFeatures(const chunk& cks, long recipe_name);
-    void InsertCnrFeatures(const chunk& cks, long cnr_name);
+    void InsertCnrFeatures(const chunk& cks, meta_data meta);
     void Leveling(list<pair<long, list<meta_data>>>& level_sort, list<meta_data>& recipe_cds_list);
 
     void EraseChunk(chunk ck){

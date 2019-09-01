@@ -150,7 +150,7 @@ void configurable_dedup::DoDedup(){
 
 												if(IfFeature(*m) && !g_only_recipe) {
 													m->Cnr_or_Recipe(true);
-													hooks_.InsertCnrFeatures(*m, current_cnr->Name());
+													hooks_.InsertCnrFeatures(*m, current_cnr->Meta());
 													cnr_hook_num++;
 												}
                    }
