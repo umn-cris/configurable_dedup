@@ -69,11 +69,11 @@ private:
     long total_chunks_=0;
     long stored_chunks_=0;
     long sequence_number_=0;
-		long total_cnr_hit_;
-		long cur_cnr_hit_;
-		long cur_io_cap_;
-		long t_win_num_;
-		long cur_version_ = -1;
+    long total_cnr_hit_;
+    long cur_cnr_hit_;
+    long cur_io_cap_;
+    long t_win_num_;
+    long cur_version_ = -1;
 
 public:
     void DoDedup();
