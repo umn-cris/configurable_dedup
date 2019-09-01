@@ -7,21 +7,23 @@
 
 
 class meta_data{
+    long chunk_num_=0;
     long name_=0;
     bool if_cnr_= true;
     long score_=0;
     long sequence_number_=0;
 public:
-    void Set(long name, string location){
+    void Set(long chunk_num,long name, string location){
+        chunk_num_=chunk_num;
         name_ =name;
         if(location=="recipe")
             if_cnr_=false;
         if(location=="container")
             if_cnr_=true;
     }
-    /*oid NumInc(){
+    void NumInc(){
         chunk_num_++;
-    }*/
+    }
     void NameInc(){
         name_++;
     }
@@ -57,27 +59,27 @@ public:
     bool operator <(meta_data d2){
         return (this->Name() < d2.Name());
     }
-		/*long GetChunkNum() {
+		long GetChunkNum() {
 			return chunk_num_;
-		}*/
+		}
 };
 
 class chunk{
     string chunk_id_;
-    //long size_=0;
+    long size_=0;
     long cnr_name_=-1;
     long recipe_name_=-1;
     bool if_cnr_=false;
 public:
     chunk(){
-        //size_=0;
+        size_=0;
         cnr_name_=-1;
         recipe_name_=-1;
         if_cnr_= false;
     }
     chunk(const chunk &value){
         chunk_id_=value.chunk_id_;
-        //size_=value.size_;
+        size_=value.size_;
         cnr_name_=value.cnr_name_;
         recipe_name_=value.recipe_name_;
         if_cnr_=value.if_cnr_;
@@ -87,7 +89,7 @@ public:
         chunk_id_=id;
     }
     void SetSize(long size){
-        //size_=size;
+        size_=size;
     }
     void SetCnrName(long name){
         cnr_name_=name;
@@ -122,20 +124,20 @@ public:
     subset(){}
     ~subset(){}
     subset(long chunk_num,long name, string location){
-        meta_.Set(name, location);
+        meta_.Set(chunk_num, name, location);
     }
 
     bool AppendChunk(chunk& ck){
         if(!Meta().IfCnr()){
             ck.SetRecipeName(Name());
             chunks_.push_back(ck);
-            //meta_.NumInc();
+            meta_.NumInc();
             return true;
         }else{
             if(chunks_.size()<g_container_size){
                 ck.SetCnrName(Name());
                 chunks_.push_back(ck);
-                //meta_.NumInc();
+                meta_.NumInc();
                 return true;
             }
             return false;
@@ -175,9 +177,9 @@ public:
     void IndicateRecipe(){
         meta_.IndicateRecipe();
     }
-		/*long GetChunkNum() {
+		long GetChunkNum() {
 			return meta_.GetChunkNum();
-		}*/
+		}
 };
 
 class container: public subset{

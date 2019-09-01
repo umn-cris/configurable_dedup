@@ -121,8 +121,13 @@ void HybridDedup::CDSegmenting( vector<chunk>& window, recipe* re,  list<recipe>
 }
 
 bool HybridDedup::IfHook(const chunk& ck) {
-	if(sampler_.PositiveFeatures(ck,g_bit_num1)) return true;
-	if(sampler_.NegativeFeatures(ck,g_bit_num2)) return true;
+	if(sampler_.PositiveFeatures(ck,g_bit_num1)){
+        return true;
+    }
+	if(sampler_.NegativeFeatures(ck,g_bit_num2)){
+	    cout<<"true"<<endl;
+        return true;
+    }
 	return false;
 }
 

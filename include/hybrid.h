@@ -76,7 +76,6 @@ private:
 		long cur_version_ = -1;
 
 public:
-
     void DoDedup();
     bool Append2Containers(container* cnr);
     bool Append2Recipes(recipe* re);
