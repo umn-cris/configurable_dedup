@@ -11,6 +11,9 @@ selection_policy level
 #unit subset/cache
 cache_size 128
 
+#at the end of window, flush cache
+if_flush true
+
 #partition number
 partition_number 16
 
@@ -30,8 +33,8 @@ window_size 4096
 IO_cap 6
 
 #sample ratio
-bit_num1 8
-bit_num2 8
+bit_num1 7
+bit_num2 7
 random_pick_ratio 32
 
 #segment ratio
