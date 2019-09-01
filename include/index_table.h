@@ -1,6 +1,8 @@
 //
 // Created by wyx on 19-6-20.
 //
+
+#include <set>
 #include "global.h"
 #include "subset.h"
 #include "sample_handler.h"
@@ -52,14 +54,16 @@ public:
 
     void InsertRecipeFeatures(const chunk& cks, long recipe_name);
     void InsertCnrFeatures(const chunk& cks, meta_data meta);
-    void Leveling(list<pair<long, list<meta_data>>>& level_sort, list<meta_data>& recipe_cds_list);
 
     void EraseChunk(chunk ck){
         EraseHookTable(ck);
     }
 
+		list<meta_data> SelectFIFO(const list<chunk>& features);
+		list<meta_data> SelectLevel(list<meta_data> recipe_cds_list);
+		list<meta_data> SelectSparse(unordered_map<long, set<string>> cds_map);
+		list<meta_data> SelectSort(list<meta_data> cds_list);
     list<meta_data> PickCandidates(const list<chunk>& features);
-    list<meta_data> PickCandidatesFIFO(const list<chunk>& features);
 
     void EraseHookTable(chunk ck);
     void PrintHookInfo(){

@@ -29,7 +29,6 @@ bool configurable_dedup::IsBoundary(chunk ck) {
 
 void configurable_dedup::Load2cache(const list<chunk>& features) {
     list<meta_data> candidates = hooks_.PickCandidates(features);
-    //list<meta_data> candidates = hooks_.PickCandidatesFIFO(features);
     if(candidates.empty()) return;
     long cap=g_IO_cap;
     for(const auto n:candidates){
@@ -200,7 +199,7 @@ void configurable_dedup::DoDedup(){
         	cout<<"current IOloads:"<<current_IOloads<<" overall IOloads:"<<IOloads<<endl;
         	cout<<"current deduprate:"<<current_deduprate<<" overall deduprate:"<<overall_deduprate<<endl<<endl;
 			} else {
-					cout<<g_dedup_engine_no<<" "<<g_cache_size<<" "<<g_container_size<<" "<<g_window_size<<" "<<g_IO_cap<<" "<<cur_win<<" "<<t_win_num_<<" "
+					cout<<g_dedup_engine_no<<" "<<g_selection_policy<<" "<<g_cache_size<<" "<<g_container_size<<" "<<g_window_size<<" "<<g_IO_cap<<" "<<cur_win<<" "<<t_win_num_<<" "
 						<<recipe_sample_ratio<<" "<<cnr_sample_ratio<<" "<<current_cnr_IOloads<<" "<<cnr_IOloads<<" "<<current_recipe_IOloads<<" "
 						<<recipe_IOloads<<" "<<current_IOloads<<" "<<IOloads<<" "<<current_total_chunks<<" "<<total_chunks_<<" "
 						<<current_stored_chunks<<" "<<stored_chunks_<<" "<<current_deduprate<<" "<<overall_deduprate<<"\n";
