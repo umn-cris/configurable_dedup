@@ -2,11 +2,11 @@ if_exact false
 if_hybrid false
 
 
-only_recipe false
-only_cnr true
+only_recipe true
+only_cnr false
 
 #subset selection policy engine for configure dedup, level, sparse, fifo, sort
-selection_policy level
+selection_policy sparse
 
 #unit subset/cache
 cache_size 128

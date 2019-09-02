@@ -102,6 +102,9 @@ void configurable_dedup::DoDedup(){
             vector<chunk> window_;
             sequence_number_++;
 
+            long last_window_chunks = total_chunks_;
+            long last_window_stored_chunks = stored_chunks_;
+
             while(trace_ptr->HasNext() && window_size>0)
             {
                 chunk ck = trace_ptr->Next();
@@ -109,8 +112,6 @@ void configurable_dedup::DoDedup(){
                 window_size--;
                 window_.push_back(ck);
             }
-            long last_window_chunks = total_chunks_;
-            long last_window_stored_chunks = stored_chunks_;
 
             cur_win++;
 						t_win_num_++;
@@ -172,7 +173,6 @@ void configurable_dedup::DoDedup(){
             long current_window_stored_chunks = stored_chunks_ - last_window_stored_chunks;
             double current_window_deduprate = current_window_chunks/(current_window_stored_chunks*1.0);
             out_window_deduprate<<t_win_num_<<" "<<current_window_deduprate<<"\n";
-
         }
         //for(auto n:recipes_) cout<<n.Name()<<" "<<n.Score()<<" "<<n.SequenceNumber()<<endl;
 
