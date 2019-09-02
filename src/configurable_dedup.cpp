@@ -69,6 +69,10 @@ void configurable_dedup::DoDedup(){
 		long recipe_hook_num = 0;
 		long cnr_hook_num = 0;
 
+    ofstream out_window_deduprate;
+    string outfile = "./window_deduprate";
+    out_window_deduprate.open(outfile,ios::out);
+
     string trace_sum, trace_name, trace_line;
     ifstream TraceSumFile;
     trace_sum = g_dedup_trace_dir + g_trace_summary_file;
@@ -85,7 +89,7 @@ void configurable_dedup::DoDedup(){
         long last_recipe_IOloads = recipe_IOloads;
         long last_total_chunks = total_chunks_;
         long last_stored_chunks = stored_chunks_;
-				long cur_win = 0;
+        long cur_win = 0;
 
 
         stringstream ss(trace_line);
@@ -105,8 +109,10 @@ void configurable_dedup::DoDedup(){
                 window_size--;
                 window_.push_back(ck);
             }
+            long last_window_chunks = total_chunks_;
+            long last_window_stored_chunks = stored_chunks_;
 
-						cur_win++;
+            cur_win++;
 						t_win_num_++;
             segments_->clear();
             CDSegmenting(window_,current_recipe,segments_);
@@ -162,6 +168,11 @@ void configurable_dedup::DoDedup(){
             }
             Append2Containers(current_cnr);
             if(g_if_flush) cache_.Flush();
+            long current_window_chunks = total_chunks_ - last_window_chunks;
+            long current_window_stored_chunks = stored_chunks_ - last_window_stored_chunks;
+            double current_window_deduprate = current_window_chunks/(current_window_stored_chunks*1.0);
+            out_window_deduprate<<t_win_num_<<" "<<current_window_deduprate<<"\n";
+
         }
         //for(auto n:recipes_) cout<<n.Name()<<" "<<n.Score()<<" "<<n.SequenceNumber()<<endl;
 
@@ -206,7 +217,7 @@ void configurable_dedup::DoDedup(){
 					cout<<g_dedup_engine_no<<" "<<g_selection_policy<<" "<<g_cache_size<<" "<<g_container_size<<" "<<g_window_size<<" "<<g_IO_cap<<" "<<cur_win<<" "<<t_win_num_<<" "
 						<<recipe_sample_ratio<<" "<<cnr_sample_ratio<<" "<<current_cnr_IOloads<<" "<<cnr_IOloads<<" "<<current_recipe_IOloads<<" "
 						<<recipe_IOloads<<" "<<current_IOloads<<" "<<IOloads<<" "<<current_total_chunks<<" "<<total_chunks_<<" "
-						<<current_stored_chunks<<" "<<stored_chunks_<<" "<<current_deduprate<<" "<<overall_deduprate<<"\n";
+                            <<current_stored_chunks<<" "<<stored_chunks_<<" "<<current_deduprate<<" "<<overall_deduprate<<"\n";
 			}
     }
 }
