@@ -96,9 +96,9 @@ void configurable_dedup::DoDedup(){
         string trace_path;
         trace_path = g_dedup_trace_dir + trace_name;
         TraceReader *trace_ptr = new TraceReader(trace_path);
+        string outfile = trace_name+"window_deduprate";
+        out_window_deduprate.open(outfile,ios::out);
         while (trace_ptr->HasNext()){
-            string outfile = trace_name+"window_deduprate";
-            out_window_deduprate.open(outfile,ios::out);
 
             long window_size=g_window_size;
             vector<chunk> window_;
@@ -175,7 +175,6 @@ void configurable_dedup::DoDedup(){
             long current_window_stored_chunks = stored_chunks_ - last_window_stored_chunks;
             double current_window_deduprate = current_window_chunks/(current_window_stored_chunks*1.0);
             out_window_deduprate<<t_win_num_<<" "<<current_window_deduprate<<"\n";
-            out_window_deduprate.close();
         }
         //for(auto n:recipes_) cout<<n.Name()<<" "<<n.Score()<<" "<<n.SequenceNumber()<<endl;
 
@@ -222,5 +221,6 @@ void configurable_dedup::DoDedup(){
 						<<recipe_IOloads<<" "<<current_IOloads<<" "<<IOloads<<" "<<current_total_chunks<<" "<<total_chunks_<<" "
                             <<current_stored_chunks<<" "<<stored_chunks_<<" "<<current_deduprate<<" "<<overall_deduprate<<"\n";
 			}
+        out_window_deduprate.close();
     }
 }
