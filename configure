@@ -1,8 +1,8 @@
 if_exact false
-if_hybrid false
+if_hybrid true
 
 
-only_recipe true
+only_recipe false
 only_cnr false
 
 #subset selection policy engine for configure dedup, level, sparse, fifo, sort

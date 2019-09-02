@@ -275,9 +275,7 @@ list<meta_data> HybridDedup::SelectSubsetNO(unordered_map<string, HookItem*> hoo
 	/*second, select the recipe candidates*/
 	long bound = g_window_size / g_container_size;
 	long k=bound;
-	if (g_IO_cap > bound) {
-		k = max(static_cast<int>(bound/2), static_cast<int>(k*2 - g_IO_cap));
-	}
+
 	vector<long> recipe_selected(k, -1);
 	list<meta_data> recipe_cans;
 	set<string> selected_hooks;
@@ -311,7 +309,7 @@ list<meta_data> HybridDedup::SelectSubsetNO(unordered_map<string, HookItem*> hoo
 
 	/*Third, exclude the cnrs that have high overlap with the data in the selected set*/
 	for (auto it = cnr_map.begin(); it !=cnr_map.end(); it++) {
-			double ratio = 0.8;
+			double ratio = 0.6;
 			long bound = floor(ratio*it->second.size());
 			long found = 0;
 			for(auto i=it->second.begin(); i!=it->second.end(); i++) {
@@ -474,7 +472,7 @@ void HybridDedup::AdjustIOCap(long can_num) {
 		cur_io_cap_ = g_IO_cap;
 		return;
 	}
-	long cal_io = static_cast<long>(ceil(g_IO_cap * static_cast<double>(cur_cnr_hit_)/ave_hit));
+	long cal_io = 5*static_cast<long>(ceil(g_IO_cap * static_cast<double>(cur_cnr_hit_)/ave_hit));
 	cur_io_cap_ = min(static_cast<int>(g_cache_size), min(static_cast<int>(credit), static_cast<int>(cal_io)));
 	cur_io_cap_ = min(static_cast<int>(g_cache_size), static_cast<int>(credit));
 	return;
