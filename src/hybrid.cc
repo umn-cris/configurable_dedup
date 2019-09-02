@@ -274,7 +274,7 @@ list<meta_data> HybridDedup::SelectSubsetNO(unordered_map<string, HookItem*> hoo
 
 	/*second, select the recipe candidates*/
 	long bound = g_window_size / g_container_size;
-	long k=bound;
+	long k=g_IO_cap;
 
 	vector<long> recipe_selected(k, -1);
 	list<meta_data> recipe_cans;
