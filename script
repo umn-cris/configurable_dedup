@@ -1,0 +1,23 @@
+#!/bin/bash
+
+proj_dir=/home/umhadmin/ur proj dir
+
+bin_dir=${proj_dir}/
+trace_dir=${proj_dir}/trace/xxxxx
+out_file=${proj_dir}/out
+
+cfgfile=${proj_dir}/configure
+
+run () {
+    #sed -i "33c IO_cap ${2}"  $1
+    #sed -i "36c bit_num1 ${2}"  $1
+    #sed -i "37c bit_num2 ${2}"  $1
+    #sed -i "38c random_pick_ratio ${2}"  $1
+    #sed -i "48c recipe_version_bound ${2}"  $1
+
+    ${bin_dir}/configurable_dedup $1 |  tee ${out_file}
+}
+
+for bit in $(seq 1 1 8); do
+	run ${cfgfile} ${bit}
+done
