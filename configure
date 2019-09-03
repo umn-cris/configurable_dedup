@@ -1,15 +1,15 @@
 if_exact false
-if_hybrid false
+if_hybrid true
 
 
-only_recipe true
+only_recipe false
 only_cnr false
 
 #subset selection policy engine for configure dedup, level, sparse, fifo, sort
 selection_policy sparse
 
 #unit subset/cache
-cache_size 128
+cache_size 1024
 
 #at the end of window, flush cache
 if_flush true
@@ -33,9 +33,9 @@ window_size 4096
 IO_cap 6
 
 #sample ratio
-bit_num1 7
-bit_num2 7
-random_pick_ratio 32
+bit_num1 6
+bit_num2 6
+random_pick_ratio 16
 
 #segment ratio
 segmenting_bit_num 0
@@ -45,7 +45,7 @@ segment_size 1024
 debug_output false
 
 # to save the space, at most x versions we keep in hook table. if 10000, no limit.
-recipe_version_bound 2
+recipe_version_bound 1
 
-dedup_trace_dir ./trace/
-trace_summary_file summary.txt
+dedup_trace_dir ./trace/trace1_16kb/
+trace_summary_file trace1_16kb.txt
