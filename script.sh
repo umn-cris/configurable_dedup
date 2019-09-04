@@ -11,6 +11,9 @@ if [ ! -d ${result_dir} ]; then
     mkdir ${result_dir}
 fi
 run () {
+    sync; echo 1 > /proc/sys/vm/drop_caches
+    sync; echo 2 > /proc/sys/vm/drop_caches
+    sync; echo 3 > /proc/sys/vm/drop_caches
     sed -i "33c IO_cap ${2}"  $1
     #sed -i "36c bit_num1 ${2}"  $1
     #sed -i "37c bit_num2 ${2}"  $1
