@@ -149,16 +149,12 @@ list<meta_data> hook_table::PickCandidates(const list<chunk>& features) {
     }
     list<meta_data> recipe_cds_list;
     list<meta_data> cnr_cds_list;
-    for (auto it:recipe_cds) {
-      recipe_cds_list.push_back(recipes_[it.first].Meta());
-      recipe_cds_list.back().SetScore(it.second);
-    }
-    for (auto it:cnr_cds) {
-      cnr_cds_list.push_back(containers_[it.first].Meta());
-      cnr_cds_list.back().SetScore(it.second);
-    }
 
 		if (g_only_cnr) {
+	    for (auto it:cnr_cds) {
+      	cnr_cds_list.push_back(containers_[it.first].Meta());
+      	cnr_cds_list.back().SetScore(it.second);
+    	}
 			if (g_selection_policy == "fifo") {
 				candidates = SelectFIFO(features);
 			} else if (g_selection_policy == "level") {
@@ -170,6 +166,10 @@ list<meta_data> hook_table::PickCandidates(const list<chunk>& features) {
 			}
 
 		} else if (g_only_recipe) {
+    	for (auto it:recipe_cds) {
+      	recipe_cds_list.push_back(recipes_[it.first].Meta());
+      	recipe_cds_list.back().SetScore(it.second);
+    	}
 			if (g_selection_policy == "fifo") {
 				candidates = SelectFIFO(features);
 			} else if (g_selection_policy == "level") {

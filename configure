@@ -2,7 +2,7 @@ if_exact false
 if_hybrid false
 
 
-only_recipe false
+only_recipe true
 only_cnr false
 
 #subset selection policy engine for configure dedup, level, sparse, fifo, sort
@@ -47,5 +47,5 @@ debug_output false
 # to save the space, at most x versions we keep in hook table. if 10000, no limit.
 recipe_version_bound 1000
 
-dedup_trace_dir ./trace/trace4_16kb/
-trace_summary_file trace4_16kb.txt
+dedup_trace_dir ./trace/
+trace_summary_file summary.txt

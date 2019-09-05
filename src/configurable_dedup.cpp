@@ -12,13 +12,17 @@ vector<recipe> recipes_;
 bool configurable_dedup::Append2Containers(container* cnr) {
     cnr->SetSequenceNumber(sequence_number_);
     cnr->SetScore(CnrScore());
-    containers_.push_back(*cnr);
+		if (g_only_cnr) {
+    	containers_.push_back(*cnr);
+		}
     cnr->reset();
     return true;
 }
 
 bool configurable_dedup::Append2Recipes(recipe* re) {
-    recipes_.push_back(*re);
+		if (g_only_recipe) {
+    	recipes_.push_back(*re);
+		}
     re->reset();
     return true;
 }
