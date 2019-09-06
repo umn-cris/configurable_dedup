@@ -128,7 +128,18 @@ bool HybridDedup::IfHook(const chunk& ck) {
 
 
 bool HybridDedup::IfFeature(const chunk& ck) {
-	return sampler_.RandomPickFeature(ck,g_random_pick_ratio);
+	if(g_uniform_for_cnr) {
+		if(sampler_.PositiveFeatures(ck,g_bit_num3)){
+      return true;
+    }
+		if(sampler_.NegativeFeatures(ck,g_bit_num4)){
+	    return true;
+    }
+		return false;	
+	} else {
+		return sampler_.RandomPickFeature(ck,g_random_pick_ratio);
+		return false;
+	}
 	return false;
 }
 
@@ -627,6 +638,12 @@ void HybridDedup::DoDedup() {
 						break;
 					}
 				}
+				string cnr_sampling;
+				if(g_uniform_for_cnr) {
+					cnr_sampling="uniform_for_cnr";
+				} else {	
+					cnr_sampling = "random_for_cnr";
+				}
 
 				if (g_debug_output) {
         	cout<<"recipe_sample_ratio: "<<recipe_sample_ratio<<endl;
@@ -642,7 +659,7 @@ void HybridDedup::DoDedup() {
 				// output the regular results:
 				cout<<g_dedup_engine_no<<" "<<g_cache_size<<" "<<g_container_size<<" "<<g_window_size<<" "<<g_IO_cap<<" "<<cur_win<<" "<<t_win_num_<<" "
 						<<index_.GetIndexSize()<<" "<<stored_recipe_hook_num<<" "<<cnr_hook_num<<" "<<stored_recipe_hook_num+cnr_hook_num<<" "
-						<<recipe_sample_ratio<<" "<<cnr_sample_ratio<<" "<<current_cnr_IOloads<<" "<<cnr_IOloads<<" "<<current_recipe_IOloads<<" "
+						<<recipe_sample_ratio<<" "<<cnr_sampling<<" "<<cnr_sample_ratio<<" "<<current_cnr_IOloads<<" "<<cnr_IOloads<<" "<<current_recipe_IOloads<<" "
 						<<recipe_IOloads<<" "<<current_IOloads<<" "<<IOloads<<" "<<current_total_chunks<<" "<<total_chunks_<<" "
 						<<current_stored_chunks<<" "<<stored_chunks_<<" "<<current_deduprate<<" "<<overall_deduprate<<"\n";
 			}

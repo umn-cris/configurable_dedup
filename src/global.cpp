@@ -31,6 +31,7 @@ long g_partition_number=0;
 long g_recipe_version_bound = 10000;
 long g_segment_size=1024;
 string g_selection_policy="level";
+bool g_uniform_for_cnr = false;
 
 int Parse(string cfgfile){
     ifstream filestream(cfgfile, ios_base::in);
@@ -120,8 +121,11 @@ int Parse(string cfgfile){
                 g_if_flush = (value=="true");
                 break;
             case hash_("selection_policy"):
-				g_selection_policy = value;
-				break;
+								g_selection_policy = value;
+						break;
+						case hash_("uniform_for_cnr"):
+								g_uniform_for_cnr = (value=="true");
+						break;
             default:
                 cout<<"unknown cfg: "<<key<<endl;
                 return -1;
