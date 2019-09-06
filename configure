@@ -35,6 +35,8 @@ IO_cap 20
 #sample ratio
 bit_num1 7
 bit_num2 7
+bit_num3 0
+bit_num4 0
 random_pick_ratio 10
 
 #segment ratio

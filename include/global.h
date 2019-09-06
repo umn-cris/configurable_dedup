@@ -39,6 +39,8 @@ extern string g_dedup_trace_dir;
 extern string g_trace_summary_file;
 extern long g_bit_num1;
 extern long g_bit_num2;
+extern long g_bit_num3;
+extern long g_bit_num4;
 extern long g_segment_size;
 extern long g_random_pick_ratio;
 extern long IOloads;
