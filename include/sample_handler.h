@@ -7,6 +7,8 @@
 class sample_handler{
 public:
     long sample_gap_=0;
+    bool Fromend_PositiveFeatures(const chunk& ck, long bit_num);
+    bool Fromend_NegativeFeatures(const chunk& ck, long bit_num);
     bool PositiveFeatures(const chunk& ck, long bit_num);
     bool NegativeFeatures(const chunk& ck, long bit_num);
     bool RandomPickFeature(const chunk& ck, long sample_ratio);

@@ -5,6 +5,30 @@
 #include "sample_handler.h"
 
 //2^-1 - 2^-4 = 2^-2+2^-3+2^-4 = 0.25+0.125+0.0625
+bool sample_handler::Fromend_NegativeFeatures(const chunk& ck, long bit_num) {
+    if(bit_num==0){
+        return false;
+    }
+    bitset<48> bits(stoll(ck.ID(), nullptr, 16));
+    for (int j = bits.size(); j > bits.size()-bit_num; --j) {
+        if(bits[j]) {
+            return false;
+        }
+    }
+    return true;
+}
+bool sample_handler::Fromend_PositiveFeatures(const chunk& ck, long bit_num) {
+    if(bit_num==0){
+        return false;
+    }
+    bitset<48> bits(stoll(ck.ID(), nullptr, 16));
+    for (int j = bits.size(); j > bits.size()-bit_num; --j) {
+        if(!bits[j]) {
+            return false;
+        }
+    }
+    return true;
+}
 bool sample_handler::NegativeFeatures(const chunk& ck, long bit_num) {
     if(bit_num==0){
         return false;
