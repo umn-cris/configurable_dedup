@@ -10,9 +10,45 @@
 #include "index_table.h"
 
 list<meta_data> hook_table::SelectFIFO(const list<chunk>& features) {
+		if (!g_if_flush) {
+			cout<<"Yixun! add the flush logic!"<<endl;
+		}
     list<meta_data> candidates;
     list<meta_data> tmp_candidates;
+		set<long> read_cans;
+		bool jump_out = false;
 
+    for( auto n:features){
+        tmp_candidates = LookUp(n.ID());
+        for (auto it:tmp_candidates) {
+            if (g_only_cnr && it.IfCnr()) {
+							read_cans.insert(it.Name());
+							if(read_cans.size()>=g_IO_cap) {
+								jump_out = true;
+								break;
+							}
+						} else if (g_only_recipe && !it.IfCnr()) {
+							read_cans.insert(it.Name());
+							if(read_cans.size()>=g_IO_cap) {
+								jump_out = true;
+								break;
+							}							
+						}
+        }
+				if (jump_out) {
+					break;
+				}
+    }
+
+		for (auto it:read_cans) {
+			if (g_only_cnr) {
+				candidates.push_back(containers_[it].Meta());
+			} else if (g_only_recipe) {
+				candidates.push_back(recipes_[it].Meta());
+			}
+		}
+
+/*
 
     for( auto n:features){
         tmp_candidates = LookUp(n.ID());
@@ -34,6 +70,7 @@ list<meta_data> hook_table::SelectFIFO(const list<chunk>& features) {
         }
     }
 
+*/
     return candidates;
 }
 
@@ -149,16 +186,12 @@ list<meta_data> hook_table::PickCandidates(const list<chunk>& features) {
     }
     list<meta_data> recipe_cds_list;
     list<meta_data> cnr_cds_list;
-    for (auto it:recipe_cds) {
-      recipe_cds_list.push_back(recipes_[it.first].Meta());
-      recipe_cds_list.back().SetScore(it.second);
-    }
-    for (auto it:cnr_cds) {
-      cnr_cds_list.push_back(containers_[it.first].Meta());
-      cnr_cds_list.back().SetScore(it.second);
-    }
 
 		if (g_only_cnr) {
+	    for (auto it:cnr_cds) {
+      	cnr_cds_list.push_back(containers_[it.first].Meta());
+      	cnr_cds_list.back().SetScore(it.second);
+    	}
 			if (g_selection_policy == "fifo") {
 				candidates = SelectFIFO(features);
 			} else if (g_selection_policy == "level") {
@@ -170,6 +203,10 @@ list<meta_data> hook_table::PickCandidates(const list<chunk>& features) {
 			}
 
 		} else if (g_only_recipe) {
+    	for (auto it:recipe_cds) {
+      	recipe_cds_list.push_back(recipes_[it.first].Meta());
+      	recipe_cds_list.back().SetScore(it.second);
+    	}
 			if (g_selection_policy == "fifo") {
 				candidates = SelectFIFO(features);
 			} else if (g_selection_policy == "level") {
