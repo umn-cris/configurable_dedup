@@ -11,9 +11,9 @@ if [ ! -d ${result_dir} ]; then
     mkdir ${result_dir}
 fi
 run () {
-    sync; echo 1 > /proc/sys/vm/drop_caches
-    sync; echo 2 > /proc/sys/vm/drop_caches
-    sync; echo 3 > /proc/sys/vm/drop_caches
+    #sync; echo 1 > /proc/sys/vm/drop_caches
+    #sync; echo 2 > /proc/sys/vm/drop_caches
+    #sync; echo 3 > /proc/sys/vm/drop_caches
     sed -i "33c IO_cap ${2}"  $1
     #sed -i "36c bit_num1 ${2}"  $1
     #sed -i "37c bit_num2 ${2}"  $1
@@ -22,7 +22,15 @@ run () {
     ${bin_dir}/configurable_dedup $1 |  tee ${result_dir}/${out_file}
 }
 
-for bit in 1 2 3 4 5 6 7 8 10 12 14 16 18 20 24; do
-  out_file=trace4_16kb_sparse_recipe_IOcap${bit}
-	run ${cfgfile} ${bit}
+for file in 1 2 3 5 6; do
+        sed -i "53c dedup_trace_dir ./trace/trace${file}_16kb/" ${cfgfile}
+        sed -i "54c trace_summary_file trace${file}_16kb.txt" ${cfgfile}
+        result_dir=${proj_dir}/trace${file}_16kb_sort_cnr_variableIOcap
+        if [ ! -d ${result_dir} ]; then
+                mkdir ${result_dir}
+        fi
+        for bit in  4 6 20; do
+                out_file=trace${file}_16kb_sort_cnr_IOcap${bit}
+                run ${cfgfile} ${bit}
+        done
 done
