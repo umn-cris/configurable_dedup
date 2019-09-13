@@ -13,14 +13,13 @@
 
 class bloom_partition{
 private:
-    vector<BloomFilter<string>> BFs_;
     vector<container> containers_;
     unordered_set<string> cache_;
     list<long> BFlist_ ;
     unordered_set<long> activeBF_;
     long curBF_=0;
 public:
-
+    vector<BloomFilter<string>> BFs_;
     long local_total_chunks_=0;
     long local_stored_chunks_=0;
     long local_IOtimes_=0;

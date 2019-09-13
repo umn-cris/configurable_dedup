@@ -69,9 +69,11 @@ void bloom_store::DoDedup() {
         long last_IOloads=0, IOloads=0;
         long last_total_chunks=0, total_chunks=0;
         long last_stored_chunks=0, stored_chunks=0;
+        long last_BF_num=0, BF_num=0;
         for(auto n:partitions_){
             last_total_chunks+=n.local_total_chunks_;
             last_stored_chunks+=n.local_stored_chunks_;
+            last_BF_num+=n.BFs_.size();
             last_IOloads+=n.local_IOtimes_;
         }
         stringstream ss(trace_line);
@@ -91,13 +93,17 @@ void bloom_store::DoDedup() {
             total_chunks+=n.local_total_chunks_;
             stored_chunks+=n.local_stored_chunks_;
             IOloads+=n.local_IOtimes_;
+            BF_num+=n.BFs_.size();
         }
         long current_IOloads = IOloads - last_IOloads;
         long current_total_chunks = total_chunks - last_total_chunks;
         long current_stored_chunks = stored_chunks - last_stored_chunks;
+        long current_BF_num = BF_num - last_BF_num;
+        double current_BF_size = 614.3*current_BF_num;
+        double BF_size = 614.3*BF_num;
         double current_deduprate = current_total_chunks/(current_stored_chunks*1.0);
         double overall_deduprate = total_chunks/(stored_chunks*1.0);
-        cout<<"current IOloads:"<<current_IOloads<<" overall IOloads:"<<IOloads<<endl;
-        cout<<"current deduprate:"<<current_deduprate<<" overall deduprate:"<<overall_deduprate<<endl<<endl;
+        cout<<g_partition_number<<" "<<g_BFcache_size<<" "<<current_stored_chunks<<" "<<stored_chunks<<" "
+        <<current_BF_size<<" "<<BF_size<<" "<<current_IOloads<<" "<<IOloads<<" "<<current_deduprate<<" "<<overall_deduprate<<endl<<endl;
     }
 }
