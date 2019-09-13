@@ -32,6 +32,8 @@ long g_recipe_version_bound = 10000;
 long g_segment_size=1024;
 string g_selection_policy="level";
 bool g_uniform_for_cnr = false;
+bool g_cap_adaptive = true;
+double g_hybrid_recipe_ratio=0.8;
 
 int Parse(string cfgfile){
     ifstream filestream(cfgfile, ios_base::in);
@@ -125,6 +127,12 @@ int Parse(string cfgfile){
 						break;
 						case hash_("uniform_for_cnr"):
 								g_uniform_for_cnr = (value=="true");
+						break;
+						case hash_("cap_adaptive"):
+								g_cap_adaptive = (value == "true");
+						break;
+						case hash_("hybrid_recipe_ratio"):
+								g_hybrid_recipe_ratio = stod(value);
 						break;
             default:
                 cout<<"unknown cfg: "<<key<<endl;
