@@ -30,7 +30,7 @@ container_size 1024
 window_size 4096
 
 #unit subset
-IO_cap 20
+IO_cap 3
 
 #sample ratio
 bit_num1 7
@@ -52,3 +52,8 @@ recipe_version_bound 1000
 
 dedup_trace_dir ./trace/
 trace_summary_file summary.txt
+
+cap_adaptive false
+
+# if it is out of (0,1) then, we use adaptive, for example 2.3
+hybrid_recipe_ratio 2.3

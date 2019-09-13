@@ -285,7 +285,12 @@ list<meta_data> HybridDedup::SelectSubsetNO(unordered_map<string, HookItem*> hoo
 
 	/*second, select the recipe candidates*/
 	long bound = g_window_size / g_container_size;
-	long k=g_IO_cap;
+	long k;
+	if (g_hybrid_recipe_ratio > 1 || g_hybrid_recipe_ratio < 0) {
+		k = g_IO_cap;
+	} else {
+		k = ceil(g_IO_cap * g_hybrid_recipe_ratio);
+	}
 
 	vector<long> recipe_selected(k, -1);
 	list<meta_data> recipe_cans;
@@ -565,7 +570,9 @@ void HybridDedup::DoDedup() {
 
 			cur_io_cap_ = g_IO_cap;
 			list<meta_data> selected_subsets = SelectSubsetNO(hitted_hook_map);
-			AdjustIOCap(static_cast<long>(selected_subsets.size()));
+			if (g_cap_adaptive) {
+				AdjustIOCap(static_cast<long>(selected_subsets.size()));
+			}
 			//cout<<selected_subsets.size()<<" "<<cur_io_cap_<<endl;
             LoadSubset2cache(selected_subsets);
 
@@ -657,8 +664,8 @@ void HybridDedup::DoDedup() {
         	cout<<"current deduprate:"<<current_deduprate<<" overall deduprate:"<<overall_deduprate<<endl<<endl;
 			} else{
 				// output the regular results:
-				cout<<g_dedup_engine_no<<" "<<g_cache_size<<" "<<g_container_size<<" "<<g_window_size<<" "<<g_IO_cap<<" "<<cur_win<<" "<<t_win_num_<<" "
-						<<index_.GetIndexSize()<<" "<<stored_recipe_hook_num<<" "<<cnr_hook_num<<" "<<stored_recipe_hook_num+cnr_hook_num<<" "
+				cout<<g_dedup_engine_no<<" "<<g_cache_size<<" "<<g_container_size<<" "<<g_window_size<<" "<<g_IO_cap<<" "<<g_cap_adaptive<<" "<<cur_win<<" "<<t_win_num_<<" "
+						<<g_hybrid_recipe_ratio<<" "<<index_.GetIndexSize()<<" "<<stored_recipe_hook_num<<" "<<cnr_hook_num<<" "<<stored_recipe_hook_num+cnr_hook_num<<" "
 						<<recipe_sample_ratio<<" "<<cnr_sampling<<" "<<cnr_sample_ratio<<" "<<current_cnr_IOloads<<" "<<cnr_IOloads<<" "<<current_recipe_IOloads<<" "
 						<<recipe_IOloads<<" "<<current_IOloads<<" "<<IOloads<<" "<<current_total_chunks<<" "<<total_chunks_<<" "
 						<<current_stored_chunks<<" "<<stored_chunks_<<" "<<current_deduprate<<" "<<overall_deduprate<<"\n";

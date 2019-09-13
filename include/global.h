@@ -54,6 +54,8 @@ extern long g_partition_number;
 extern long g_recipe_version_bound;
 extern string g_selection_policy;
 extern bool g_uniform_for_cnr;
+extern bool g_cap_adaptive;
+extern double g_hybrid_recipe_ratio;
 
 int Parse(string cfgfile);
 
