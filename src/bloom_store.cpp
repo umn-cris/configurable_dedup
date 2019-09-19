@@ -9,7 +9,7 @@ void bloom_partition::PartitionDedup(chunk ck) {
     //cout<<local_total_chunks_<<" ";
 
     if(BFs_.empty()) {
-        BloomFilter<string> bf(g_container_size,0.1);
+        BloomFilter<string> bf(g_container_size,0.001);
         BFs_.push_back(bf);
     }
     if(containers_.empty()){
@@ -99,8 +99,8 @@ void bloom_store::DoDedup() {
         long current_total_chunks = total_chunks - last_total_chunks;
         long current_stored_chunks = stored_chunks - last_stored_chunks;
         long current_BF_num = BF_num - last_BF_num;
-        double current_BF_size = 614.3*current_BF_num;
-        double BF_size = 614.3*BF_num;
+        double current_BF_size = partitions_[0].BFs_[0].Getsize()*current_BF_num;
+        double BF_size = partitions_[0].BFs_[0].Getsize()*BF_num;
         double current_deduprate = current_total_chunks/(current_stored_chunks*1.0);
         double overall_deduprate = total_chunks/(stored_chunks*1.0);
         cout<<g_partition_number<<" "<<g_BFcache_size<<" "<<current_stored_chunks<<" "<<stored_chunks<<" "

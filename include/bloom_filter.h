@@ -87,6 +87,9 @@ public:
         return true;
     }
 
+    double Getsize(){
+        return bits_.size()/8.0;
+    }
 private:
     vector<char> bits_;
     int32_t k_;
