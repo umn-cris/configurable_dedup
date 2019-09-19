@@ -44,7 +44,7 @@ void bloom_partition::PartitionDedup(chunk ck) {
         container cnr;
         containers_.push_back(cnr);
         containers_[curBF_].AppendChunk(ck);
-        BloomFilter<string> bf(g_container_size,0.1);
+        BloomFilter<string> bf(g_container_size,0.001);
         BFs_.push_back(bf);
     }
     cache_.insert(ck.ID());
