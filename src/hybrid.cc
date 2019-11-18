@@ -585,7 +585,7 @@ void HybridDedup::DoDedup() {
                 //cout<<m->ID()<<endl;
                 if(cache_.LookUp(*m)){
                 	cache_hit++;
-                } else {
+                }else {
                   cache_miss++;
                   stored_chunks_++;
                   if(!current_cnr->AppendChunk(*m)){
@@ -664,7 +664,7 @@ void HybridDedup::DoDedup() {
         	cout<<"current deduprate:"<<current_deduprate<<" overall deduprate:"<<overall_deduprate<<endl<<endl;
 			} else{
 				// output the regular results:
-				cout<<g_dedup_engine_no<<" "<<g_cache_size<<" "<<g_container_size<<" "<<g_window_size<<" "<<g_IO_cap<<" "<<g_cap_adaptive<<" "<<cur_win<<" "<<t_win_num_<<" "
+				cout<<g_dedup_engine<<" "<<g_cache_size<<" "<<g_container_size<<" "<<g_window_size<<" "<<g_IO_cap<<" "<<g_cap_adaptive<<" "<<cur_win<<" "<<t_win_num_<<" "
 						<<g_hybrid_recipe_ratio<<" "<<index_.GetIndexSize()<<" "<<stored_recipe_hook_num<<" "<<cnr_hook_num<<" "<<stored_recipe_hook_num+cnr_hook_num<<" "
 						<<recipe_sample_ratio<<" "<<cnr_sampling<<" "<<cnr_sample_ratio<<" "<<current_cnr_IOloads<<" "<<cnr_IOloads<<" "<<current_recipe_IOloads<<" "
 						<<recipe_IOloads<<" "<<current_IOloads<<" "<<IOloads<<" "<<current_total_chunks<<" "<<total_chunks_<<" "

@@ -67,12 +67,14 @@ public:
 class chunk{
     string chunk_id_;
     long size_=0;
+    long location_;
     //long cnr_name_=-1;
     //long recipe_name_=-1;
     bool if_cnr_=false;
 public:
     chunk(){
         size_=0;
+        location_=0;
         //cnr_name_=-1;
         //recipe_name_=-1;
         if_cnr_= false;
@@ -80,6 +82,7 @@ public:
     chunk(const chunk &value){
         chunk_id_=value.chunk_id_;
         size_=value.size_;
+        location_=value.location_;
         //cnr_name_=value.cnr_name_;
         //recipe_name_=value.recipe_name_;
         if_cnr_=value.if_cnr_;
@@ -91,6 +94,9 @@ public:
     void SetSize(long size){
         size_=size;
     }
+    void SetLocation(long position){
+        location_=position;
+    }
 /*
     void SetCnrName(long name){
         cnr_name_=name;
@@ -101,6 +107,9 @@ public:
 */
     string ID()const{
         return chunk_id_;
+    }
+    long GetLocation(){
+        return location_;
     }
     bool IfCnr(){
         return if_cnr_;
@@ -139,6 +148,7 @@ public:
         }else{
             if(chunks_.size()<g_container_size){
                 //ck.SetCnrName(Name());
+                ck.SetLocation(meta_.Name());
                 chunks_.push_back(ck);
                 meta_.NumInc();
                 return true;
@@ -180,9 +190,9 @@ public:
     void IndicateRecipe(){
         meta_.IndicateRecipe();
     }
-		long GetChunkNum() {
-			return meta_.GetChunkNum();
-		}
+    long GetChunkNum() {
+        return meta_.GetChunkNum();
+    }
 };
 
 class container: public subset{

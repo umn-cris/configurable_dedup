@@ -48,7 +48,7 @@ extern long cnr_IOloads;
 extern long recipe_IOloads;
 extern long g_segmenting_bit_num;
 extern bool g_debug_output;
-extern long g_dedup_engine_no;
+extern string g_dedup_engine;
 extern long g_BFcache_size;
 extern long g_partition_number;
 extern long g_recipe_version_bound;
@@ -56,7 +56,7 @@ extern string g_selection_policy;
 extern bool g_uniform_for_cnr;
 extern bool g_cap_adaptive;
 extern double g_hybrid_recipe_ratio;
-
+extern bool g_print_window_deduprate;
 int Parse(string cfgfile);
 
 typedef std::uint64_t hash_t;

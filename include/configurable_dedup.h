@@ -21,8 +21,9 @@ private:
 public:
 
     void DoDedup();
+    void ReStore();
     bool Append2Containers(container* cnr);
-    bool Append2Recipes(recipe* re);
+    bool Append2Recipes(list<recipe>* segments);
     void CDSegmenting( vector<chunk>& window, recipe* re, list<recipe>* segments);
     bool IsBoundary(chunk ck, long num);
     void Load2cache(const list<chunk>& features);

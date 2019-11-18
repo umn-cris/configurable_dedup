@@ -14,7 +14,7 @@ extern vector<recipe> recipes_;
 
 class index_table{
 public:
-    virtual bool LookUp(chunk ck)=0;
+    virtual bool LookUp(chunk& ck)=0;
     virtual void EraseChunk(chunk ck)=0;
 };
 
@@ -30,7 +30,7 @@ private:
 public:
     unordered_map<string,hook_entry> map_;
 
-    bool LookUp(chunk ck){
+    bool LookUp(chunk& ck){
         if(map_.find(ck.ID())!=map_.end())
             return true;
         else
@@ -52,19 +52,20 @@ public:
         }
     }
 
-    void InsertRecipeFeatures(const chunk& cks, long recipe_name);
+    void InsertRecipeFeatures(const chunk& cks, meta_data meta);
     void InsertCnrFeatures(const chunk& cks, meta_data meta);
+
 
     void EraseChunk(chunk ck){
         EraseHookTable(ck);
     }
 
-		list<meta_data> SelectFIFO(const list<chunk>& features);
-		list<meta_data> SelectLevel(list<meta_data> recipe_cds_list);
-		list<meta_data> SelectSparse(unordered_map<long, set<string>> cds_map);
-		list<meta_data> SelectSort(list<meta_data> cds_list);
+    list<meta_data> SelectFIFO(const list<chunk>& features);
+    list<meta_data> SelectLevel(list<meta_data> recipe_cds_list);
+    list<meta_data> SelectSparse(unordered_map<long, set<string>> cds_map);
+    list<meta_data> SelectSort(list<meta_data> cds_list);
     list<meta_data> PickCandidates(const list<chunk>& features);
-
+    list<meta_data> SimplePickCandidates(const list<chunk>& features);
     void EraseHookTable(chunk ck);
     void PrintHookInfo(){
         cout<<"print hook info~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"<<endl;
@@ -89,9 +90,12 @@ public:
         capacity_= g_cache_size;
     }
 
-    bool LookUp(chunk ck){
-        if(map_.find(ck.ID())!=map_.end())
+    bool LookUp(chunk& ck){
+        if(map_.find(ck.ID())!=map_.end()){
+            //ck = map_[ck.ID()];
+            ck.SetLocation(map_[ck.ID()].GetLocation());
             return true;
+        }
         else
             return false;
     }

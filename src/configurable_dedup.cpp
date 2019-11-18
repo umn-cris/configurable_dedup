@@ -12,18 +12,18 @@ vector<recipe> recipes_;
 bool configurable_dedup::Append2Containers(container* cnr) {
     cnr->SetSequenceNumber(sequence_number_);
     cnr->SetScore(CnrScore());
-		if (g_only_cnr) {
-    	containers_.push_back(*cnr);
-		}
+    if (!g_only_recipe) {
+        containers_.push_back(*cnr);
+    }
     cnr->reset();
     return true;
 }
 
-bool configurable_dedup::Append2Recipes(recipe* re) {
-		if (g_only_recipe) {
-    	recipes_.push_back(*re);
-		}
-    re->reset();
+bool configurable_dedup::Append2Recipes(list<recipe>* segments) {
+    for(auto n:*segments){
+        n.IndicateRecipe();
+        recipes_.push_back(n);
+    }
     return true;
 }
 
@@ -36,7 +36,9 @@ bool configurable_dedup::IsBoundary(chunk ck, long num) {
     return false;}
 
 void configurable_dedup::Load2cache(const list<chunk>& features) {
-    list<meta_data> candidates = hooks_.PickCandidates(features);
+    list<meta_data> candidates = hooks_.SimplePickCandidates(features);
+//  to do: make a call to records the hotness of subsets, to show the unseen pattern of subset.
+
     if(candidates.empty()) return;
     long cap=g_IO_cap;
     for(const auto n:candidates){
@@ -54,13 +56,13 @@ void configurable_dedup::CDSegmenting( vector<chunk>& window, recipe* re,  list<
         if(IsBoundary(window[i],i)){
             re->SetSequenceNumber(sequence_number_);
             segments->push_back(*re);
-            Append2Recipes(re);
+            re->reset();
         }else{
             re->AppendChunk(window[i]);
         }
     }
     segments->push_back(*re);
-    Append2Recipes(re);
+    re->reset();
 }
 
 
@@ -69,11 +71,11 @@ void configurable_dedup::DoDedup(){
     container* current_cnr = new container(0,0,"container");
     recipe* current_recipe = new recipe(0,0,"recipe");
     list<recipe>* segments_= new list<recipe>;
-		long t_win_num_ = 0;
-		long recipe_hook_num = 0;
-		long cnr_hook_num = 0;
-
+    long t_win_num_ = 0;
+    long recipe_hook_num = 0;
+    long cnr_hook_num = 0;
     ofstream out_window_deduprate;
+
 
 
     string trace_sum, trace_name, trace_line;
@@ -100,8 +102,12 @@ void configurable_dedup::DoDedup(){
         string trace_path;
         trace_path = g_dedup_trace_dir + trace_name;
         TraceReader *trace_ptr = new TraceReader(trace_path);
-        string outfile = trace_name+"window_deduprate";
-        out_window_deduprate.open(outfile,ios::out);
+        if(g_print_window_deduprate){
+            string outfile = trace_name+"window_deduprate";
+            out_window_deduprate.open(outfile,ios::out);
+        }
+
+
         while (trace_ptr->HasNext()){
 
             long window_size=g_window_size;
@@ -120,8 +126,7 @@ void configurable_dedup::DoDedup(){
             }
 
             cur_win++;
-						t_win_num_++;
-            segments_->clear();
+            t_win_num_++;
             CDSegmenting(window_,current_recipe,segments_);
             list<chunk> hitted_hooks;
 
@@ -140,19 +145,20 @@ void configurable_dedup::DoDedup(){
              * although only features belong to recipe that hit the hook table, those loaded subsets including both cnr and recipe
              * in here, old features(hit hook table) are recipe features while new features (not contained in hook table) are cnr features*/
 
-                Load2cache(hitted_hooks);
+            Load2cache(hitted_hooks);
 
 
             /*3. dedup via lru_cache*/
 
-            for(auto n:*segments_){
+            for(auto &n:*segments_){
                 list<chunk>::iterator m = n.chunks_.begin();
                 while(m!=n.chunks_.end()){
                     //cout<<m->ID()<<endl;
                    if(IfFeature(*m) && !g_only_cnr) {
-                         m->Cnr_or_Recipe(false);
-                         hooks_.InsertRecipeFeatures(*m, n.Name());
-												 recipe_hook_num++;
+                         //m->Cnr_or_Recipe(false);
+                         n.IndicateRecipe();
+                         hooks_.InsertRecipeFeatures(*m, n.Meta());
+                         recipe_hook_num++;
                    }
                    if(cache_.LookUp(*m)){
                         cache_hit++;
@@ -164,21 +170,29 @@ void configurable_dedup::DoDedup(){
                             current_cnr->AppendChunk(*m);
                         }
 
-												if(IfFeature(*m) && !g_only_recipe) {
-													m->Cnr_or_Recipe(true);
-													hooks_.InsertCnrFeatures(*m, current_cnr->Meta());
-													cnr_hook_num++;
-												}
+                       if(IfFeature(*m) && !g_only_recipe) {
+                            //m->Cnr_or_Recipe(true);
+                            current_cnr->IndicateCnr();
+                            hooks_.InsertCnrFeatures(*m, current_cnr->Meta());
+                            cnr_hook_num++;
+                        }
                    }
                    m++;
+
                 }
             }
+
             Append2Containers(current_cnr);
+            Append2Recipes(segments_);
+            segments_->clear();
+
             if(g_if_flush) cache_.Flush();
             long current_window_chunks = total_chunks_ - last_window_chunks;
             long current_window_stored_chunks = stored_chunks_ - last_window_stored_chunks;
             double current_window_deduprate = current_window_chunks/(current_window_stored_chunks*1.0);
-            out_window_deduprate<<t_win_num_<<" "<<current_window_deduprate<<"\n";
+            if(g_print_window_deduprate){
+                out_window_deduprate<<t_win_num_<<" "<<current_window_deduprate<<"\n";
+            }
         }
         //for(auto n:recipes_) cout<<n.Name()<<" "<<n.Score()<<" "<<n.SequenceNumber()<<endl;
 
@@ -212,19 +226,33 @@ void configurable_dedup::DoDedup(){
         double current_deduprate = current_total_chunks/(current_stored_chunks*1.0);
         double overall_deduprate = total_chunks_/(stored_chunks_*1.0);
 	
-				if (g_debug_output) {
+        if (g_debug_output) {
         	cout<<"Sample_ratio"<<sample_ratio<<endl;
         	cout<<"hook_hit:"<<hook_hit<<" cache hit:"<<cache_hit<<" cache miss:"<<cache_miss<<endl;
         	cout<<"current cnr_IO:"<<current_cnr_IOloads<<" overall cnr_IO:"<<cnr_IOloads<<endl;
         	cout<<"current recipe_IO:"<<current_recipe_IOloads<<" overall recipe_IO:"<<recipe_IOloads<<endl;
         	cout<<"current IOloads:"<<current_IOloads<<" overall IOloads:"<<IOloads<<endl;
         	cout<<"current deduprate:"<<current_deduprate<<" overall deduprate:"<<overall_deduprate<<endl<<endl;
-			} else {
-					cout<<g_dedup_engine_no<<" "<<g_selection_policy<<" "<<g_cache_size<<" "<<g_container_size<<" "<<g_window_size<<" "<<g_IO_cap<<" "<<cur_win<<" "<<t_win_num_<<" "
-						<<recipe_sample_ratio<<" "<<cnr_sample_ratio<<" "<<current_cnr_IOloads<<" "<<cnr_IOloads<<" "<<current_recipe_IOloads<<" "
-						<<recipe_IOloads<<" "<<current_IOloads<<" "<<IOloads<<" "<<current_total_chunks<<" "<<total_chunks_<<" "
-                            <<current_stored_chunks<<" "<<stored_chunks_<<" "<<current_deduprate<<" "<<overall_deduprate<<"\n";
+        } else {
+            cout<<g_dedup_engine<<" "<<g_selection_policy<<" "<<g_cache_size<<" "<<g_container_size<<" "<<g_window_size<<" "<<g_IO_cap<<" "<<cur_win<<" "<<t_win_num_<<" "
+                <<recipe_sample_ratio<<" "<<cnr_sample_ratio<<" "<<current_cnr_IOloads<<" "<<cnr_IOloads<<" "<<current_recipe_IOloads<<" "
+                <<recipe_IOloads<<" "<<current_IOloads<<" "<<IOloads<<" "<<current_total_chunks<<" "<<total_chunks_<<" "
+                <<current_stored_chunks<<" "<<stored_chunks_<<" "<<current_deduprate<<" "<<overall_deduprate<<"\n";
 			}
-        out_window_deduprate.close();
+        if(g_print_window_deduprate){
+            out_window_deduprate.close();
+        }
     }
+    /*ofstream out_recipe("./recipe",ios::out);
+    if(!out_recipe.is_open()) cout<<"open recipe faile"<<endl;*/
+    for(auto n:recipes_){
+        for(auto m:n.chunks_){
+            cout<<m.ID()<<" "<<m.GetLocation()<<"\n";
+        }
+    }
+    //out_recipe.close();
+}
+
+void configurable_dedup::ReStore() {
+
 }

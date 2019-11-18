@@ -10,13 +10,13 @@
 #include "index_table.h"
 
 list<meta_data> hook_table::SelectFIFO(const list<chunk>& features) {
-		if (!g_if_flush) {
-			cout<<"Yixun! add the flush logic!"<<endl;
-		}
+    if (!g_if_flush) {
+        cout<<"Yixun! add the flush logic!"<<endl;
+    }
     list<meta_data> candidates;
     list<meta_data> tmp_candidates;
-		set<long> read_cans;
-		bool jump_out = false;
+    set<long> read_cans;
+    bool jump_out = false;
 
     for( auto n:features){
         tmp_candidates = LookUp(n.ID());
@@ -162,15 +162,25 @@ list<meta_data> hook_table::SelectSort(list<meta_data> cds_list) {
 	cds_list.sort(comp);
 	return cds_list;
 }
+list<meta_data> hook_table::SimplePickCandidates(const list<chunk>& features) {
+    list<meta_data> temp_candidates;
+    list<meta_data> candidates;
 
+    for(auto n:features){
+        temp_candidates = LookUp(n.ID());
+        candidates.merge(temp_candidates);
+    }
+    candidates.unique();
+    return candidates;
+}
 
 list<meta_data> hook_table::PickCandidates(const list<chunk>& features) {
     list<meta_data> candidates;
     list<meta_data> tmp_candidates;
     unordered_map<long, long> recipe_cds;
     unordered_map<long, long> cnr_cds;
-		unordered_map<long, set<string>> recipe_map;
-		unordered_map<long, set<string>> cnr_map;
+    unordered_map<long, set<string>> recipe_map;
+    unordered_map<long, set<string>> cnr_map;
 
     for( auto n:features){
         tmp_candidates = LookUp(n.ID());
@@ -222,13 +232,13 @@ list<meta_data> hook_table::PickCandidates(const list<chunk>& features) {
 }
 
 
-void hook_table::InsertRecipeFeatures(const chunk &cks, long recipe_name) {
+void hook_table::InsertRecipeFeatures(const chunk &cks, meta_data meta) {
         hook_entry* entry;
         if (LookUp(cks.ID(),&entry)) {
-            entry->candidates_.push_back(recipes_[recipe_name].Meta());
+            entry->candidates_.push_back(meta);
         } else {
             hook_entry tmp_entry;
-            tmp_entry.candidates_.push_back(recipes_[recipe_name].Meta());
+            tmp_entry.candidates_.push_back(meta);
             map_.emplace(cks.ID(),tmp_entry);
         }
 }

@@ -3,6 +3,7 @@
 //
 
 #include "global.h"
+bool g_print_window_deduprate=false;
 bool g_if_exact=false;
 bool g_if_hybrid=false;
 bool g_only_cnr=false;
@@ -26,7 +27,7 @@ long cnr_IOloads=0;
 long recipe_IOloads=0;
 long g_segmenting_bit_num=0;
 bool g_debug_output=true;
-long g_dedup_engine_no=0;
+string g_dedup_engine;
 long g_partition_number=0;
 long g_recipe_version_bound = 10000;
 long g_segment_size=1024;
@@ -123,17 +124,20 @@ int Parse(string cfgfile){
                 g_if_flush = (value=="true");
                 break;
             case hash_("selection_policy"):
-								g_selection_policy = value;
-						break;
-						case hash_("uniform_for_cnr"):
-								g_uniform_for_cnr = (value=="true");
-						break;
-						case hash_("cap_adaptive"):
-								g_cap_adaptive = (value == "true");
-						break;
-						case hash_("hybrid_recipe_ratio"):
-								g_hybrid_recipe_ratio = stod(value);
-						break;
+                g_selection_policy = value;
+                break;
+                case hash_("uniform_for_cnr"):
+                    g_uniform_for_cnr = (value=="true");
+                break;
+                case hash_("cap_adaptive"):
+                    g_cap_adaptive = (value == "true");
+                break;
+                case hash_("hybrid_recipe_ratio"):
+                    g_hybrid_recipe_ratio = stod(value);
+                break;
+                case hash_("print_window_deduprate"):
+                    g_print_window_deduprate = (value=="true");
+                    break;
             default:
                 cout<<"unknown cfg: "<<key<<endl;
                 return -1;

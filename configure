@@ -1,12 +1,12 @@
-if_exact true
+if_exact false
 if_hybrid false
 
 
-only_recipe false
+only_recipe true
 only_cnr false
 
 #subset selection policy engine for configure dedup, level, sparse, fifo, sort
-selection_policy fifo
+selection_policy sparse
 
 #unit subset/cache
 cache_size 1024
@@ -57,3 +57,6 @@ cap_adaptive false
 
 # if it is out of (0,1) then, we use adaptive, for example 2.3
 hybrid_recipe_ratio 2.3
+
+
+print_window_deduprate true

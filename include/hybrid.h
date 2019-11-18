@@ -28,7 +28,7 @@ private:
 public:
     unordered_map<string,HookItem> map_;
 
-    bool LookUp(chunk ck){
+    bool LookUp(chunk& ck){
         if(map_.find(ck.ID())!=map_.end())
             return true;
         else

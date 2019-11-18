@@ -2,11 +2,14 @@
 <project version="4">
   <component name="PublishConfigData">
     <serverData>
-      <paths name="WSL (9897ef8d-b4f9-4d16-9e77-9665c3dc395b)">
+      <paths name="Remote Host (44f5c617-b923-4d9c-9177-c527f913d0a9)">
         <serverdata>
           <mappings>
-            <mapping local="$PROJECT_DIR$" web="/" />
+            <mapping deploy="/tmp/tmp.ZQWbLXbfCW" local="$PROJECT_DIR$" />
           </mappings>
+          <excludedPaths>
+            <excludedPath local="true" path="$PROJECT_DIR$/cmake-build-debug" />
+          </excludedPaths>
         </serverdata>
       </paths>
     </serverData>
