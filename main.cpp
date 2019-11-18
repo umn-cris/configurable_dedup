@@ -15,26 +15,32 @@ int main(int argc, char** argv) {
         cerr<< "parse config file " << cfgfile << " failed!\n";
         return -1;
     }
-    if(!g_if_exact)
-    {
-        if (g_if_hybrid) {
-            g_dedup_engine = "hybrid";
-            HybridDedup dedup;
-            dedup.DoDedup();
-        } else {
-            if (g_only_cnr && !g_only_recipe) {
-                g_dedup_engine = "cnr only";
+    if(g_dedup){
+        if(!g_if_exact)
+        {
+            if (g_if_hybrid) {
+                g_dedup_engine = "hybrid";
+                HybridDedup dedup;
+                dedup.DoDedup();
             } else {
-                g_dedup_engine = "recipe only";
+                if (g_only_cnr && !g_only_recipe) {
+                    g_dedup_engine = "cnr only";
+                } else {
+                    g_dedup_engine = "recipe only";
+                }
+                configurable_dedup dedup_process;
+                dedup_process.DoDedup();
             }
-        configurable_dedup dedup_process;
-        dedup_process.DoDedup();
         }
+        else{
+            g_dedup_engine = "bloomStore";
+            bloom_store bloombloom;
+            bloombloom.DoDedup();
+        }
+    }else{
+        configurable_dedup restore_process;
+        restore_process.ReStore();
     }
-    else{
-        g_dedup_engine = "bloomStore";
-        bloom_store bloombloom;
-        bloombloom.DoDedup();
-    }
+
     return 0;
 }

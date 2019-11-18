@@ -3,6 +3,7 @@
 //
 
 #include "global.h"
+bool g_dedup;
 bool g_print_window_deduprate=false;
 bool g_if_exact=false;
 bool g_if_hybrid=false;
@@ -17,6 +18,7 @@ long g_IO_cap=0;
 long g_BFcache_size=0;
 string g_dedup_trace_dir;
 string g_trace_summary_file;
+string g_recipe_file;
 long g_bit_num1=0;
 long g_bit_num2=0;
 long g_bit_num3=0;
@@ -126,18 +128,24 @@ int Parse(string cfgfile){
             case hash_("selection_policy"):
                 g_selection_policy = value;
                 break;
-                case hash_("uniform_for_cnr"):
-                    g_uniform_for_cnr = (value=="true");
+            case hash_("uniform_for_cnr"):
+                g_uniform_for_cnr = (value=="true");
                 break;
-                case hash_("cap_adaptive"):
-                    g_cap_adaptive = (value == "true");
+            case hash_("cap_adaptive"):
+                g_cap_adaptive = (value == "true");
                 break;
-                case hash_("hybrid_recipe_ratio"):
-                    g_hybrid_recipe_ratio = stod(value);
+            case hash_("hybrid_recipe_ratio"):
+                g_hybrid_recipe_ratio = stod(value);
                 break;
-                case hash_("print_window_deduprate"):
-                    g_print_window_deduprate = (value=="true");
-                    break;
+            case hash_("print_window_deduprate"):
+                g_print_window_deduprate = (value=="true");
+                break;
+            case hash_("dedup"):
+                g_dedup = (value=="true");
+                break;
+            case hash_("recipe_file"):
+                g_recipe_file = value;
+                break;
             default:
                 cout<<"unknown cfg: "<<key<<endl;
                 return -1;

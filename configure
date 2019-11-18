@@ -1,3 +1,4 @@
+dedup true
 if_exact false
 if_hybrid false
 
@@ -52,6 +53,7 @@ recipe_version_bound 1000
 
 dedup_trace_dir ./trace/
 trace_summary_file summary.txt
+recipe_file recipe
 
 cap_adaptive false
 
@@ -59,4 +61,4 @@ cap_adaptive false
 hybrid_recipe_ratio 2.3
 
 
-print_window_deduprate true
+print_window_deduprate false

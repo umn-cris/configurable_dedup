@@ -25,6 +25,7 @@
 #include <utility>
 #include <math.h>
 using namespace std;
+extern bool g_dedup;
 extern bool g_if_exact;
 extern bool g_if_hybrid;
 extern bool g_only_cnr;
@@ -37,6 +38,7 @@ extern long g_container_size;
 extern long g_IO_cap;
 extern string g_dedup_trace_dir;
 extern string g_trace_summary_file;
+extern string g_recipe_file;
 extern long g_bit_num1;
 extern long g_bit_num2;
 extern long g_bit_num3;

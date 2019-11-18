@@ -2,6 +2,7 @@
 // Created by wyx on 19-6-20.
 //
 
+#include <unordered_set>
 #include "configurable_dedup.h"
 
 vector<container> containers_;
@@ -245,14 +246,34 @@ void configurable_dedup::DoDedup(){
     }
     /*ofstream out_recipe("./recipe",ios::out);
     if(!out_recipe.is_open()) cout<<"open recipe faile"<<endl;*/
+    vector<long> fragmentation;
     for(auto n:recipes_){
+        unordered_set<long> set;
         for(auto m:n.chunks_){
-            cout<<m.ID()<<" "<<m.GetLocation()<<"\n";
+            //cout<<m.GetLocation()<<"\n";
+            set.emplace(m.GetLocation());
         }
+        fragmentation.push_back(set.size());
     }
+    //ofstream frag("fragmentation",ios::out);
+    for(auto m:fragmentation){
+        cout<<m<<endl;
+    }
+    //frag.close();
     //out_recipe.close();
 }
 
 void configurable_dedup::ReStore() {
+    string recipe_name, recipe_line;
+    ifstream RecipeFile;
+    recipe_name =  g_recipe_file;
+    RecipeFile.open(recipe_name);
+    if (RecipeFile.fail()) {
+        cerr << "open "<< recipe_name <<  "failed!\n";
+        exit(1);
+    }
 
+    while(getline(RecipeFile, recipe_line)) {
+        // in motivation experiments, we do not consider cache, just check the fragmentation
+    }
 }
