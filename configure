@@ -3,11 +3,11 @@ if_exact false
 if_hybrid false
 
 
-only_recipe true
-only_cnr false
+only_recipe false
+only_cnr true
 
 #subset selection policy engine for configure dedup, level, sparse, fifo, sort
-selection_policy sparse
+selection_policy sort
 
 #unit subset/cache
 cache_size 1024
@@ -31,7 +31,7 @@ container_size 1024
 window_size 4096
 
 #unit subset
-IO_cap 3
+IO_cap 10000
 
 #sample ratio
 bit_num1 7
@@ -39,6 +39,8 @@ bit_num2 7
 bit_num3 7
 bit_num4 0
 random_pick_ratio 41
+if_min_hook_sampling true
+min_hook_number 41
 uniform_for_cnr false
 
 #segment ratio
@@ -46,7 +48,7 @@ segmenting_bit_num 0
 #segment number
 segment_size 1024
 
-debug_output false
+debug_output true
 
 # to save the space, at most x versions we keep in hook table. if 10000, no limit.
 recipe_version_bound 1000

@@ -28,12 +28,13 @@ public:
     bool IsBoundary(chunk ck, long num);
     void Load2cache(const list<chunk>& features);
     bool IfFeature(const chunk& ck){
-		if (!g_only_recipe) {
+		/*if (!g_only_recipe) {
         	return sampler_.RandomPickFeature(ck,g_random_pick_ratio);
 		} else {
         	if(sampler_.PositiveFeatures(ck,g_bit_num1)) return true;
         	if(sampler_.NegativeFeatures(ck,g_bit_num2)) return true;
-		}
+		}*/
+
         return false;
     }
     long inline CnrScore(){

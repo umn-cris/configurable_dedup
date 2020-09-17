@@ -24,6 +24,8 @@ long g_bit_num2=0;
 long g_bit_num3=0;
 long g_bit_num4=0;
 long g_random_pick_ratio=0;
+long g_min_hook_number=0;
+bool g_if_min_hook_sampling=false;
 long IOloads = 0;
 long cnr_IOloads=0;
 long recipe_IOloads=0;
@@ -92,6 +94,9 @@ int Parse(string cfgfile){
             case hash_("random_pick_ratio"):
                 g_random_pick_ratio = stol(value);
                 break;
+            case hash_("min_hook_number"):
+                g_min_hook_number = stol(value);
+                break;
             case hash_("segmenting_bit_num"):
                 g_segmenting_bit_num = stol(value);
                 break;
@@ -100,6 +105,9 @@ int Parse(string cfgfile){
                 break;
             case hash_("only_cnr"):
                 g_only_cnr = (value=="true");
+                break;
+            case hash_("if_min_hook_sampling"):
+                g_if_min_hook_sampling = (value=="true");
                 break;
             case hash_("only_recipe"):
                 g_only_recipe = (value=="true");

@@ -15,7 +15,6 @@ int main(int argc, char** argv) {
         cerr<< "parse config file " << cfgfile << " failed!\n";
         return -1;
     }
-    if(g_dedup){
         if(!g_if_exact)
         {
             if (g_if_hybrid) {
@@ -37,10 +36,6 @@ int main(int argc, char** argv) {
             bloom_store bloombloom;
             bloombloom.DoDedup();
         }
-    }else{
-        configurable_dedup restore_process;
-        restore_process.ReStore();
-    }
 
     return 0;
 }

@@ -45,6 +45,8 @@ extern long g_bit_num3;
 extern long g_bit_num4;
 extern long g_segment_size;
 extern long g_random_pick_ratio;
+extern long g_min_hook_number;
+extern bool g_if_min_hook_sampling;
 extern long IOloads;
 extern long cnr_IOloads;
 extern long recipe_IOloads;

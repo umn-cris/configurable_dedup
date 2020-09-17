@@ -86,3 +86,7 @@ bool sample_handler::RandomPickFeature(const chunk &ck, long sample_ratio) {
     sample_gap_++;
     return false;
 }
+
+bool sample_handler::MinFeatures(const chunk &ck, long bit_num) {
+
+}

@@ -7,8 +7,12 @@
 
 vector<container> containers_;
 vector<recipe> recipes_;
-
-
+struct ckComp{
+    bool operator()(const chunk &a, const chunk &b){
+        return a.ID()>b.ID(); // from big to small
+    }
+};
+set<chunk,ckComp> min_hooks;
 
 bool configurable_dedup::Append2Containers(container* cnr) {
     cnr->SetSequenceNumber(sequence_number_);
@@ -108,7 +112,6 @@ void configurable_dedup::DoDedup(){
             out_window_deduprate.open(outfile,ios::out);
         }
 
-
         while (trace_ptr->HasNext()){
 
             long window_size=g_window_size;
@@ -151,6 +154,7 @@ void configurable_dedup::DoDedup(){
 
             /*3. dedup via lru_cache*/
 
+
             for(auto &n:*segments_){
                 list<chunk>::iterator m = n.chunks_.begin();
                 while(m!=n.chunks_.end()){
@@ -170,22 +174,43 @@ void configurable_dedup::DoDedup(){
                             Append2Containers(current_cnr);
                             current_cnr->AppendChunk(*m);
                         }
+                        // code for min sampling
+                       if(g_if_min_hook_sampling){
+                           if(min_hooks.size()<g_min_hook_number) {
+                               min_hooks.insert(*m);
+                           }
+                           else{
 
-                       if(IfFeature(*m) && !g_only_recipe) {
-                            //m->Cnr_or_Recipe(true);
+                               string boundary = min_hooks.begin()->ID();
+                               if( boundary > m->ID()) {
+                                   min_hooks.erase(min_hooks.begin());
+                                   min_hooks.insert(*m);
+                               }
+                           }
+                       }
+                       else if (IfFeature(*m) && !g_only_recipe) {
+                           //m->Cnr_or_Recipe(true);
                             current_cnr->IndicateCnr();
                             hooks_.InsertCnrFeatures(*m, current_cnr->Meta());
                             cnr_hook_num++;
+
                         }
                    }
                    m++;
-
                 }
             }
-
             Append2Containers(current_cnr);
             Append2Recipes(segments_);
             segments_->clear();
+            // every window pick a fix number of min chunk as hook
+            if(g_if_min_hook_sampling){
+                for(auto s:min_hooks){
+                    containers_[s.GetLocation()].IndicateCnr();
+                    hooks_.InsertCnrFeatures(s, containers_[s.GetLocation()].Meta());
+                    cnr_hook_num++;
+                }
+                min_hooks.clear();
+            }
 
             if(g_if_flush) cache_.Flush();
             long current_window_chunks = total_chunks_ - last_window_chunks;
@@ -246,7 +271,7 @@ void configurable_dedup::DoDedup(){
     }
     /*ofstream out_recipe("./recipe",ios::out);
     if(!out_recipe.is_open()) cout<<"open recipe faile"<<endl;*/
-    vector<long> fragmentation;
+    /*vector<long> fragmentation;
     for(auto n:recipes_){
         unordered_set<long> set;
         for(auto m:n.chunks_){
@@ -258,7 +283,7 @@ void configurable_dedup::DoDedup(){
     //ofstream frag("fragmentation",ios::out);
     for(auto m:fragmentation){
         cout<<m<<endl;
-    }
+    }*/
     //frag.close();
     //out_recipe.close();
 }
