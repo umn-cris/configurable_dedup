@@ -230,8 +230,8 @@ void configurable_dedup::DoDedup(){
             for (auto n:recipes_)cout << n.Name() << " " << n.SequenceNumber() << endl;
         }*/
          IOloads = cnr_IOloads+recipe_IOloads;
-         long size=0;
-         for(auto n:hooks_.map_)size += n.second.candidates_.size();
+         long size=hooks_.map_.size();
+         //for(auto n:hooks_.map_)size += n.second.candidates_.size();
          long sample_ratio = total_chunks_/size;
 				double recipe_sample_ratio, cnr_sample_ratio;
 				if (recipe_hook_num == 0) {
