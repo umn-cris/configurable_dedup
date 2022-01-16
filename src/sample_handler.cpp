@@ -87,6 +87,13 @@ bool sample_handler::RandomPickFeature(const chunk &ck, long sample_ratio) {
     return false;
 }
 
+bool sample_handler::SequentialPickFeature(const chunk &ck, long position) {
+    if(position>0){
+        return true;
+    }
+    return false;
+}
+
 bool sample_handler::MinFeatures(const chunk &ck, long bit_num) {
 
 }

@@ -29,7 +29,7 @@ TraceReader::TraceReader(string tracefile) {
 TraceReader::~TraceReader() {
 	file_stream.close();
 }
-bool TraceReader::  HasNext() {
+bool TraceReader::HasNext() {
 
     if (!getline(file_stream, trace_line))
         return false;

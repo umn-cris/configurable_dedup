@@ -59,9 +59,9 @@ public:
     bool operator <(meta_data d2){
         return (this->Name() < d2.Name());
     }
-		long GetChunkNum() {
-			return chunk_num_;
-		}
+    long GetChunkNum() {
+        return chunk_num_;
+    }
 };
 
 class chunk{
@@ -152,8 +152,10 @@ public:
                 chunks_.push_back(ck);
                 meta_.NumInc();
                 return true;
+            } else{
+                return false;
             }
-            return false;
+
         }
     }
 

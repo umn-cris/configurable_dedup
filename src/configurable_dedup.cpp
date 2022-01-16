@@ -15,7 +15,7 @@ struct ckComp{
 set<chunk,ckComp> min_hooks;
 
 bool configurable_dedup::Append2Containers(container* cnr) {
-    cnr->SetSequenceNumber(sequence_number_);
+    //cnr->SetSequenceNumber(sequence_number_);
     cnr->SetScore(CnrScore());
     if (!g_only_recipe) {
         containers_.push_back(*cnr);
@@ -41,8 +41,9 @@ bool configurable_dedup::IsBoundary(chunk ck, long num) {
     return false;}
 
 void configurable_dedup::Load2cache(const list<chunk>& features) {
+    // we have multiple hook hit, each hook associates with several metagroups.
+    // meta group selection problem: which hook's which meta group to pick
     list<meta_data> candidates = hooks_.SimplePickCandidates(features);
-//  to do: make a call to records the hotness of subsets, to show the unseen pattern of subset.
 
     if(candidates.empty()) return;
     long cap=g_IO_cap;
@@ -66,16 +67,154 @@ void configurable_dedup::CDSegmenting( vector<chunk>& window, recipe* re,  list<
             re->AppendChunk(window[i]);
         }
     }
+    re->SetSequenceNumber(sequence_number_);
     segments->push_back(*re);
     re->reset();
 }
 
+bool compareFunction (subset a, subset b) {return a.Score()>b.Score();}
+
+void configurable_dedup::CheckDW(int backup_version){
+    container* current_cnr = new container(0,0,"container");
+
+    // randomly select a DW to check.
+    // for incremental gcc, DW can be small than 10
+    unordered_set<string> all_chunks;
+
+
+
+    string trace_sum, trace_name, trace_line;
+    ifstream TraceSumFile;
+    trace_sum = g_dedup_trace_dir + g_trace_summary_file;
+    TraceSumFile.open(trace_sum);
+    if (TraceSumFile.fail()) {
+        cerr << "open "<< trace_sum <<  "failed!\n";
+        exit(1);
+    }
+
+    int cur_backup_version = 0;
+    while(getline(TraceSumFile, trace_line)) {
+        stringstream ss(trace_line);
+        getline(ss, trace_name, ' ');
+        string trace_path;
+        trace_path = g_dedup_trace_dir + trace_name;
+        TraceReader *trace_ptr = new TraceReader(trace_path);
+
+        cur_backup_version++;
+        while (trace_ptr->HasNext()){
+
+            long window_size=g_window_size;
+            recipe* current_window = new recipe(0,0,"recipe");
+            current_window->SetSequenceNumber(sequence_number_);
+
+            //batch deduplication, each time grab a window size of chunks to do dedupe
+            while(trace_ptr->HasNext() && window_size>0)
+            {
+                chunk ck = trace_ptr->Next();
+                total_chunks_++;
+                window_size--;
+                current_window->AppendChunk(ck);
+            }
+
+
+            if (cur_backup_version==backup_version){
+                unordered_set<string> cur_DW_CKs;
+                for (auto c:current_window->chunks_)
+                    cur_DW_CKs.insert(c.ID());
+
+                //check all recipe, set the score as number of duplicates
+                auto n=recipes_.begin();
+                while (n!=recipes_.end()){
+                    int hit=0;
+                    for (auto nc:n->chunks_){
+                        if (cur_DW_CKs.find(nc.ID())!=cur_DW_CKs.end())
+                            hit++;
+                    }
+                    n->SetScore(hit);
+                    n++;
+                }
+
+                //check all cnr, set the score as number of duplicates
+                auto m=containers_.begin();
+                while (m!=containers_.end()){
+                    int hit=0;
+                    for (auto mc:m->chunks_){
+                        if (cur_DW_CKs.find(mc.ID())!=cur_DW_CKs.end())
+                            hit++;
+                    }
+                    m->SetScore(hit);
+                    m++;
+                }
+
+                //sort cnr and recipe based on score
+                sort(recipes_.begin(),recipes_.end(),compareFunction);
+                sort(containers_.begin(),containers_.end(),compareFunction);
+
+                //calculate accumulated duplicates from recipe which has most duplicates to recipe which has 10th most duplicates
+                auto recipe_it=recipes_.begin();
+                int accumulated_duplicates=0;
+                for (int i = 0; i < 10; ++i) {
+                    // check how many duplicates the ith recipe can contribute
+                    for (auto c:recipe_it->chunks_){
+                        if (cur_DW_CKs.find(c.ID())!=cur_DW_CKs.end()){
+                            accumulated_duplicates++;
+                            // erase the duplicates, so later recipes will not repeatedly contribute
+                            cur_DW_CKs.erase(cur_DW_CKs.find(c.ID()));
+                        }
+                    }
+                    cout<<i<<"th recipe, accumulated duplicates:"<<accumulated_duplicates<<endl;
+                    recipe_it++;
+                }
+
+                //calculate accumulated duplicates from cnr which has most duplicates to cnr which has 10th most duplicates
+                auto cnr_it=containers_.begin();
+                accumulated_duplicates=0;
+                // reset cur_DW_CKs, cause it has erase some chunks when used to check recipe
+                for (auto c:current_window->chunks_)
+                    cur_DW_CKs.insert(c.ID());
+
+                for (int i = 0; i < 10; ++i) {
+                    // check how many duplicates the ith recipe can contribute
+                    for (auto c:cnr_it->chunks_){
+                        if (cur_DW_CKs.find(c.ID())!=cur_DW_CKs.end()){
+                            accumulated_duplicates++;
+                            // erase the duplicates, so later recipes will not repeatedly contribute
+                            cur_DW_CKs.erase(cur_DW_CKs.find(c.ID()));
+                        }
+                    }
+                    cout<<i<<"th cnr, accumulated duplicates:"<<accumulated_duplicates<<endl;
+                    cnr_it++;
+                }
+            }
+
+
+            //dedupe and store recipe & cnr
+            auto m = current_window->chunks_.begin();
+            while(m!=current_window->chunks_.end()) {
+                auto it = all_chunks.find(m->ID());
+                if(it==all_chunks.end()){
+                    // new chunk, add to cnr. As for recipe, it will ingest this chunk later anyways
+                    if(!current_cnr->AppendChunk(*m)){
+                        Append2Containers(current_cnr);
+                        current_cnr->AppendChunk(*m);
+                    }
+                }
+                all_chunks.insert(m->ID());
+                m++;
+            }
+            //Append2Containers(current_cnr);
+            recipes_.push_back(*current_window);
+            sequence_number_++;
+        }
+
+    }
+
+}
 
 void configurable_dedup::DoDedup(){
-
     container* current_cnr = new container(0,0,"container");
     recipe* current_recipe = new recipe(0,0,"recipe");
-    list<recipe>* segments_= new list<recipe>;
+    //list<recipe>* segments_= new list<recipe>;
     long t_win_num_ = 0;
     long recipe_hook_num = 0;
     long cnr_hook_num = 0;
@@ -115,36 +254,39 @@ void configurable_dedup::DoDedup(){
         while (trace_ptr->HasNext()){
 
             long window_size=g_window_size;
-            vector<chunk> window_;
-            sequence_number_++;
+            recipe window_;
+            window_.SetSequenceNumber(++sequence_number_);
+
 
             long last_window_chunks = total_chunks_;
             long last_window_stored_chunks = stored_chunks_;
 
+            //batch deduplication, each time grab a window size of chunks to do dedupe
             while(trace_ptr->HasNext() && window_size>0)
             {
                 chunk ck = trace_ptr->Next();
                 total_chunks_++;
                 window_size--;
-                window_.push_back(ck);
+                window_.AppendChunk(ck);
             }
 
             cur_win++;
             t_win_num_++;
-            CDSegmenting(window_,current_recipe,segments_);
+            //CDSegmenting(window_,current_recipe,segments_);
             list<chunk> hitted_hooks;
 
-            for(auto n:*segments_){
-                list<chunk>::iterator m = n.chunks_.begin();
-                    /*1. pick hook*/
-                    while (m!=n.chunks_.end()){
-                        if(hooks_.LookUp(*m)){
-                            hitted_hooks.push_back(*m);
-                            hook_hit++;
-                        }
-                        m++;
+            //a batch of chunks will be first cut to multiple segments, each segment is a small set of chunks
+            //segment is the basic unit to execute hook/sample/load cnr or recipe
+            list<chunk>::iterator m = window_.chunks_.begin();
+                /*1.hook hit*/
+                while (m!=window_.chunks_.end()){
+                    if(hooks_.LookUp(*m)){
+                        hitted_hooks.push_back(*m);
+                        hook_hit++;
                     }
-            }
+                    m++;
+                }
+
             /*2 according to recipe_features which hit the hook table, load champion subsets to lru_cache.
              * although only features belong to recipe that hit the hook table, those loaded subsets including both cnr and recipe
              * in here, old features(hit hook table) are recipe features while new features (not contained in hook table) are cnr features*/
@@ -153,21 +295,16 @@ void configurable_dedup::DoDedup(){
 
 
             /*3. dedup via lru_cache*/
+                // go over each chunk in the segment
 
-
-            for(auto &n:*segments_){
-                list<chunk>::iterator m = n.chunks_.begin();
-                while(m!=n.chunks_.end()){
-                    //cout<<m->ID()<<endl;
-                   if(IfFeature(*m) && !g_only_cnr) {
-                         //m->Cnr_or_Recipe(false);
-                         n.IndicateRecipe();
-                         hooks_.InsertRecipeFeatures(*m, n.Meta());
-                         recipe_hook_num++;
-                   }
+            m = window_.chunks_.begin();
+            while(m!=window_.chunks_.end()) {
+                   //cache hit
                    if(cache_.LookUp(*m)){
                         cache_hit++;
-                   }else{
+                   }
+                   // or store unique chunk
+                   else{
                         cache_miss++;
                         stored_chunks_++;
                         if(!current_cnr->AppendChunk(*m)){
@@ -175,42 +312,49 @@ void configurable_dedup::DoDedup(){
                             current_cnr->AppendChunk(*m);
                         }
                         // code for min sampling
-                       if(g_if_min_hook_sampling){
+                      /* if(g_if_min_hook_sampling){
                            if(min_hooks.size()<g_min_hook_number) {
                                min_hooks.insert(*m);
                            }
                            else{
-
                                string boundary = min_hooks.begin()->ID();
                                if( boundary > m->ID()) {
                                    min_hooks.erase(min_hooks.begin());
                                    min_hooks.insert(*m);
                                }
                            }
-                       }
-                       else if (IfFeature(*m) && !g_only_recipe) {
-                           //m->Cnr_or_Recipe(true);
-                            current_cnr->IndicateCnr();
-                            hooks_.InsertCnrFeatures(*m, current_cnr->Meta());
-                            cnr_hook_num++;
-
-                        }
+                       }*/
                    }
                    m++;
                 }
+            //Append2Containers(current_cnr);
+            recipes_.push_back(window_);
+
+
+            //sample hook from window
+            m = window_.chunks_.begin();
+            while(m!=window_.chunks_.end()) {
+                //check if should sample as hook
+                if (IfFeature(*m)) {
+                    if (!g_only_cnr)
+                        window_.IndicateRecipe();
+                    else
+                        window_.IndicateCnr();
+                    hooks_.InsertFeatures(*m, window_.Meta());
+                    //recipe_hook_num++;
+                    //or cnr_hook_num++;
+                }
             }
-            Append2Containers(current_cnr);
-            Append2Recipes(segments_);
-            segments_->clear();
+
             // every window pick a fix number of min chunk as hook
-            if(g_if_min_hook_sampling){
+            /*if(g_if_min_hook_sampling){
                 for(auto s:min_hooks){
                     containers_[s.GetLocation()].IndicateCnr();
-                    hooks_.InsertCnrFeatures(s, containers_[s.GetLocation()].Meta());
+                    hooks_.InsertFeatures(s, containers_[s.GetLocation()].Meta());
                     cnr_hook_num++;
                 }
                 min_hooks.clear();
-            }
+            }*/
 
             if(g_if_flush) cache_.Flush();
             long current_window_chunks = total_chunks_ - last_window_chunks;
@@ -230,7 +374,7 @@ void configurable_dedup::DoDedup(){
             for (auto n:recipes_)cout << n.Name() << " " << n.SequenceNumber() << endl;
         }*/
          IOloads = cnr_IOloads+recipe_IOloads;
-         long size=hooks_.map_.size();
+         long size=hooks_.cached_hooks_.size();
          //for(auto n:hooks_.map_)size += n.second.candidates_.size();
          long sample_ratio = total_chunks_/size;
 				double recipe_sample_ratio, cnr_sample_ratio;

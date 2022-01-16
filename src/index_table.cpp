@@ -162,11 +162,13 @@ list<meta_data> hook_table::SelectSort(list<meta_data> cds_list) {
 	cds_list.sort(comp);
 	return cds_list;
 }
+
 list<meta_data> hook_table::SimplePickCandidates(const list<chunk>& features) {
     list<meta_data> temp_candidates;
     list<meta_data> candidates;
 
     for(auto n:features){
+        //every feature is possible to associate with meta groups
         temp_candidates = LookUp(n.ID());
         candidates.merge(temp_candidates);
     }
@@ -175,84 +177,98 @@ list<meta_data> hook_table::SimplePickCandidates(const list<chunk>& features) {
 }
 
 list<meta_data> hook_table::PickCandidates(const list<chunk>& features) {
-    list<meta_data> candidates;
-    list<meta_data> tmp_candidates;
-    unordered_map<long, long> recipe_cds;
-    unordered_map<long, long> cnr_cds;
-    unordered_map<long, set<string>> recipe_map;
-    unordered_map<long, set<string>> cnr_map;
+    list<meta_data> pick_candidates;
+    list<meta_data> hook_associate_subsets;
+    unordered_map<long, long> recipe_candidates_hit_num;
+    unordered_map<long, long> cnr_candidates_hit_num;
+    unordered_map<long, set<string>> recipe_candidates_map;
+    unordered_map<long, set<string>> cnr_candidates_map;
 
-    for( auto n:features){
-        tmp_candidates = LookUp(n.ID());
-        for (auto it:tmp_candidates) {
-          if (it.IfCnr()) {
-            cnr_cds[it.Name()]++;
-						cnr_map[it.Name()].insert(n.ID());
-          } else {
-            recipe_cds[it.Name()]++;
-						recipe_map[it.Name()].insert(n.ID());
-          }
+    //record the occurrence frequency of hooks' associated subsets
+    for(auto n:features){
+        hook_associate_subsets = LookUp(n.ID());
+        for (auto it:hook_associate_subsets) {
+            if (it.IfCnr()) {
+                if (cnr_candidates_hit_num.find(it.Name())!=cnr_candidates_hit_num.end())
+                    cnr_candidates_hit_num[it.Name()]++;
+                else
+                    cnr_candidates_hit_num.emplace(it.Name(),1);
+
+                if (cnr_candidates_map.find(it.Name())!=cnr_candidates_map.end())
+                    cnr_candidates_map[it.Name()].insert(n.ID());
+                else{
+                    set<string> s;
+                    s.insert(n.ID());
+                    cnr_candidates_map.emplace(it.Name(),s);
+                }
+            } else {
+                if (recipe_candidates_hit_num.find(it.Name())!=recipe_candidates_hit_num.end())
+                    recipe_candidates_hit_num[it.Name()]++;
+                else
+                    recipe_candidates_hit_num.emplace(it.Name(),1);
+
+                if (recipe_candidates_map.find(it.Name())!=recipe_candidates_map.end())
+                    recipe_candidates_map[it.Name()].insert(n.ID());
+                else{
+                    set<string> s;
+                    s.insert(n.ID());
+                    recipe_candidates_map.emplace(it.Name(),s);
+                }
+            }
         }    
     }
+
+    //
     list<meta_data> recipe_cds_list;
     list<meta_data> cnr_cds_list;
 
-		if (g_only_cnr) {
-	    for (auto it:cnr_cds) {
-      	cnr_cds_list.push_back(containers_[it.first].Meta());
-      	cnr_cds_list.back().SetScore(it.second);
+    if (g_only_cnr) {
+	    for (auto it:cnr_candidates_hit_num) {
+      	    cnr_cds_list.push_back(containers_[it.first].Meta());
+      	    cnr_cds_list.back().SetScore(it.second);
     	}
 			if (g_selection_policy == "fifo") {
-				candidates = SelectFIFO(features);
+				pick_candidates = SelectFIFO(features);
 			} else if (g_selection_policy == "level") {
-				candidates = SelectLevel(cnr_cds_list);
+                pick_candidates = SelectLevel(cnr_cds_list);
 			} else if (g_selection_policy == "sparse") {
-				candidates = SelectSparse(cnr_map);
+                pick_candidates = SelectSparse(cnr_candidates_map);
 			} else if (g_selection_policy == "sort") {
-				candidates = SelectSort(cnr_cds_list);
+                pick_candidates = SelectSort(cnr_cds_list);
 			}
 
-		} else if (g_only_recipe) {
-    	for (auto it:recipe_cds) {
-      	recipe_cds_list.push_back(recipes_[it.first].Meta());
-      	recipe_cds_list.back().SetScore(it.second);
+    } else if (g_only_recipe) {
+    	for (auto it:recipe_candidates_hit_num) {
+      	    recipe_cds_list.push_back(recipes_[it.first].Meta());
+      	    recipe_cds_list.back().SetScore(it.second);
     	}
 			if (g_selection_policy == "fifo") {
-				candidates = SelectFIFO(features);
+                pick_candidates = SelectFIFO(features);
 			} else if (g_selection_policy == "level") {
-				candidates = SelectLevel(recipe_cds_list);
+                pick_candidates = SelectLevel(recipe_cds_list);
 			} else if (g_selection_policy == "sparse") {
-				candidates = SelectSparse(recipe_map);
+                pick_candidates = SelectSparse(recipe_candidates_map);
 			} else if (g_selection_policy == "sort") {
-				candidates = SelectSort(recipe_cds_list);
+                pick_candidates = SelectSort(recipe_cds_list);
 			}
 		}
-
-    return candidates;
+    //thinking about what subset I want to load as motivation experiments with I/O cap
+    // rank
+    return pick_candidates;
 }
 
 
-void hook_table::InsertRecipeFeatures(const chunk &cks, meta_data meta) {
+void hook_table::InsertFeatures(const chunk &cks, meta_data meta) {
         hook_entry* entry;
         if (LookUp(cks.ID(),&entry)) {
             entry->candidates_.push_back(meta);
         } else {
             hook_entry tmp_entry;
             tmp_entry.candidates_.push_back(meta);
-            map_.emplace(cks.ID(),tmp_entry);
+            cached_hooks_.emplace(cks.ID(),tmp_entry);
         }
 }
 
-void hook_table::InsertCnrFeatures(const chunk &cks, meta_data meta) {
-        hook_entry* entry;
-        if (LookUp(cks.ID(),&entry)) {
-            entry->candidates_.push_back(meta);
-        } else {
-            hook_entry tmp_entry;
-            tmp_entry.candidates_.push_back(meta);
-            map_.emplace(cks.ID(),tmp_entry);
-        }
-}
 void hook_table::EraseHookTable(chunk ck) {}
 
 
@@ -306,6 +322,6 @@ void lru_cache::Evict() {
 }
 
 void lru_cache::Flush() {
-    map_.clear();
+    cached_chunks_.clear();
     lru_cache_.clear();
 }

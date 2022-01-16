@@ -21,6 +21,7 @@ private:
 public:
 
     void DoDedup();
+    void CheckDW(int backup_version);
     void ReStore();
     bool Append2Containers(container* cnr);
     bool Append2Recipes(list<recipe>* segments);
@@ -28,6 +29,7 @@ public:
     bool IsBoundary(chunk ck, long num);
     void Load2cache(const list<chunk>& features);
     bool IfFeature(const chunk& ck){
+        return sampler_.RandomPickFeature(ck,g_random_pick_ratio);
 		/*if (!g_only_recipe) {
         	return sampler_.RandomPickFeature(ck,g_random_pick_ratio);
 		} else {

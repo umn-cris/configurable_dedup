@@ -28,7 +28,7 @@ chunk_size 4
 container_size 1024
 
 #unit chunks/window
-window_size 4096
+window_size 1024
 
 #unit subset
 IO_cap 10000
@@ -53,7 +53,8 @@ debug_output true
 # to save the space, at most x versions we keep in hook table. if 10000, no limit.
 recipe_version_bound 1000
 
-dedup_trace_dir ./trace/
+#dedup_trace_dir ./gcc_out_incre_5/
+dedup_trace_dir ./gcc_out_full/
 trace_summary_file summary.txt
 recipe_file recipe
 

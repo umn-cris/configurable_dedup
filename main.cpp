@@ -27,8 +27,9 @@ int main(int argc, char** argv) {
                 } else {
                     g_dedup_engine = "recipe only";
                 }
-                configurable_dedup dedup_process;
-                dedup_process.DoDedup();
+                configurable_dedup dedup;
+                //dedup.DoDedup();
+                dedup.CheckDW(2);
             }
         }
         else{

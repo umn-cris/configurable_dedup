@@ -28,18 +28,18 @@ public:
 class hook_table: public index_table{
 private:
 public:
-    unordered_map<string,hook_entry> map_;
+    unordered_map<string,hook_entry> cached_hooks_;
 
     bool LookUp(chunk& ck){
-        if(map_.find(ck.ID())!=map_.end())
+        if(cached_hooks_.find(ck.ID())!=cached_hooks_.end())
             return true;
         else
             return false;
     }
 
     bool LookUp(string id, hook_entry** entry){
-        if(map_.find(id)!=map_.end()){
-            *entry = &map_[id];
+        if(cached_hooks_.find(id)!=cached_hooks_.end()){
+            *entry = &cached_hooks_[id];
             return true;
         }
         else
@@ -47,13 +47,13 @@ public:
     }
 
     list<meta_data> LookUp(string id){
-        if(map_.find(id)!=map_.end()){
-            return map_[id].candidates_;
-        }
+        if(cached_hooks_.find(id)!=cached_hooks_.end()){
+            return cached_hooks_[id].candidates_;
+        } else cout<<"[index_table.h] [LookUp(string id)] no candidates found"<<endl;
     }
 
-    void InsertRecipeFeatures(const chunk& cks, meta_data meta);
-    void InsertCnrFeatures(const chunk& cks, meta_data meta);
+    void InsertFeatures(const chunk& cks, meta_data meta);
+
 
 
     void EraseChunk(chunk ck){
@@ -69,8 +69,8 @@ public:
     void EraseHookTable(chunk ck);
     void PrintHookInfo(){
         cout<<"print hook info~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"<<endl;
-        cout<<"hook size:"<<map_.size()<<endl;
-        for(auto n:map_) {
+        cout<<"hook size:"<<cached_hooks_.size()<<endl;
+        for(auto n:cached_hooks_) {
             cout<<n.first<<endl;
             for (auto m:n.second.candidates_){
                 cout<<"     name:"<<m.Name()<<" cnr?"<<m.IfCnr()<<" score"<<m.Score()<<endl;
@@ -83,7 +83,7 @@ public:
 class lru_cache: public index_table{
 private:
     long capacity_ ;
-    unordered_map<string,chunk> map_;
+    unordered_map<string,chunk> cached_chunks_;
     list<meta_data> lru_cache_ ;
 public:
     lru_cache() {
@@ -91,9 +91,9 @@ public:
     }
 
     bool LookUp(chunk& ck){
-        if(map_.find(ck.ID())!=map_.end()){
+        if(cached_chunks_.find(ck.ID())!=cached_chunks_.end()){
             //ck = map_[ck.ID()];
-            ck.SetLocation(map_[ck.ID()].GetLocation());
+            ck.SetLocation(cached_chunks_[ck.ID()].GetLocation());
             return true;
         }
         else
@@ -101,28 +101,28 @@ public:
     }
 
     bool LookUp(string id, chunk* ck){
-        if(map_.find(id)!=map_.end()){
-            *ck=map_[id];
+        if(cached_chunks_.find(id)!=cached_chunks_.end()){
+            *ck=cached_chunks_[id];
             return true;
         }
         else
             return false;
     }
 
-    void InsertChunks(const list<chunk>& ck, bool if_cnr){
-        for(auto n:ck){
+    void InsertChunks(const list<chunk>& cks, bool if_cnr){
+        for(auto n:cks){
             n.Cnr_or_Recipe(if_cnr);
             if(LookUp(n)){
-                map_[n.ID()] = n;
+                cached_chunks_[n.ID()] = n;
             }
             else{
-                map_.emplace(n.ID(), n);
+                cached_chunks_.emplace(n.ID(), n);
             }
         }
     }
 
     void EraseChunk(chunk ck){
-        map_.erase(ck.ID());
+        cached_chunks_.erase(ck.ID());
     }
 
     bool Load(const meta_data value);
