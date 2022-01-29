@@ -185,6 +185,7 @@ void configurable_dedup::CheckDW(int backup_version){
                     cout<<i<<"th cnr, accumulated duplicates:"<<accumulated_duplicates<<endl;
                     cnr_it++;
                 }
+                return;
             }
 
 
@@ -206,7 +207,6 @@ void configurable_dedup::CheckDW(int backup_version){
             recipes_.push_back(*current_window);
             sequence_number_++;
         }
-
     }
 
 }

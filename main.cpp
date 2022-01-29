@@ -29,7 +29,7 @@ int main(int argc, char** argv) {
                 }
                 configurable_dedup dedup;
                 //dedup.DoDedup();
-                dedup.CheckDW(2);
+                dedup.CheckDW(33);
             }
         }
         else{
