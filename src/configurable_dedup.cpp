@@ -247,17 +247,11 @@ void configurable_dedup::DoDedup(){
     ofstream out_window_deduprate;
 
 
+    vector<string> all_files_ = listFiles(g_dedup_trace_dir, true);
 
-    string trace_sum, trace_name, trace_line;
-    ifstream TraceSumFile;
-    trace_sum = g_dedup_trace_dir + g_trace_summary_file;
-    TraceSumFile.open(trace_sum);
-    if (TraceSumFile.fail()) {
-        cerr << "open "<< trace_sum <<  "failed!\n";
-        exit(1);
-    }
+    for(auto n:all_files_){
+        cout<<n<<endl;
 
-    while(getline(TraceSumFile, trace_line)) {
         long cache_hit=0, cache_miss=0, hook_hit=0;
         long last_IOloads = IOloads;
         long last_cnr_IOloads = cnr_IOloads;
@@ -267,15 +261,8 @@ void configurable_dedup::DoDedup(){
         long cur_win = 0;
 
 
-        stringstream ss(trace_line);
-        getline(ss, trace_name, ' ');
-        string trace_path;
-        trace_path = g_dedup_trace_dir + trace_name;
-        TraceReader *trace_ptr = new TraceReader(trace_path);
-        if(g_print_window_deduprate){
-            string outfile = trace_name+"window_deduprate";
-            out_window_deduprate.open(outfile,ios::out);
-        }
+        TraceReader *trace_ptr = new TraceReader(n);
+
 
         while (trace_ptr->HasNext()){
 

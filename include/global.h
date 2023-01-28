@@ -24,6 +24,9 @@
 #include <bitset>
 #include <utility>
 #include <math.h>
+#include <sys/stat.h>
+#include <dirent.h>
+
 using namespace std;
 extern bool g_dedup;
 extern bool g_if_exact;
@@ -72,4 +75,7 @@ constexpr hash_t hash_(char const* str, hash_t last_value = basis)
 {
     return *str ? hash_(str+1, (*str ^ last_value) * prime) : last_value;
 }
+
+vector<string> listFiles(string baseDir, bool recursive);
+
 #endif //CONFIGURABLE_DEDUP_GLOBAL_H
