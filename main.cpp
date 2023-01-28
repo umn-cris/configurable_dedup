@@ -28,8 +28,8 @@ int main(int argc, char** argv) {
                     g_dedup_engine = "recipe only";
                 }
                 configurable_dedup dedup;
-                //dedup.DoDedup();
-                dedup.CheckDW(33);
+                dedup.DoDedup();
+                //dedup.CheckDW(33);
             }
         }
         else{

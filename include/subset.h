@@ -140,22 +140,15 @@ public:
     }
 
     bool AppendChunk(chunk& ck){
-        if(!Meta().IfCnr()){
-            //ck.SetRecipeName(Name());
+        // recipe container share same size
+        if(chunks_.size()<g_container_size){
+            //ck.SetCnrName(Name());
+            ck.SetLocation(meta_.Name());
             chunks_.push_back(ck);
             meta_.NumInc();
             return true;
-        }else{
-            if(chunks_.size()<g_container_size){
-                //ck.SetCnrName(Name());
-                ck.SetLocation(meta_.Name());
-                chunks_.push_back(ck);
-                meta_.NumInc();
-                return true;
-            } else{
-                return false;
-            }
-
+        } else{
+            return false;
         }
     }
 

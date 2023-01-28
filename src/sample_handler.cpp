@@ -87,6 +87,14 @@ bool sample_handler::RandomPickFeature(const chunk &ck, long sample_ratio) {
     return false;
 }
 
+bool sample_handler::ChunkIDPickFeature(const chunk &ck, long sample_ratio) {
+    string ss = ck.ID().substr(15,2);
+    auto value = stol(ss, nullptr, 16);
+
+    if ((value+1)%sample_ratio==0) return true;
+    else return false;
+}
+
 bool sample_handler::SequentialPickFeature(const chunk &ck, long position) {
     if(position>0){
         return true;

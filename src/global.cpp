@@ -19,11 +19,13 @@ long g_BFcache_size=0;
 string g_dedup_trace_dir;
 string g_trace_summary_file;
 string g_recipe_file;
+string g_sampling_method;
 long g_bit_num1=0;
 long g_bit_num2=0;
 long g_bit_num3=0;
 long g_bit_num4=0;
 long g_random_pick_ratio=0;
+long g_chunkID_pick_ratio=0;
 long g_min_hook_number=0;
 bool g_if_min_hook_sampling=false;
 long IOloads = 0;
@@ -94,6 +96,9 @@ int Parse(string cfgfile){
             case hash_("random_pick_ratio"):
                 g_random_pick_ratio = stol(value);
                 break;
+            case hash_("chunkID_pick_ratio"):
+                g_chunkID_pick_ratio = stol(value);
+                break;
             case hash_("min_hook_number"):
                 g_min_hook_number = stol(value);
                 break;
@@ -135,6 +140,9 @@ int Parse(string cfgfile){
                 break;
             case hash_("selection_policy"):
                 g_selection_policy = value;
+                break;
+            case hash_("sampling_method"):
+                g_sampling_method = value;
                 break;
             case hash_("uniform_for_cnr"):
                 g_uniform_for_cnr = (value=="true");

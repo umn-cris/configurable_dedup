@@ -22,7 +22,6 @@ class hook_entry{
 public:
     hook_entry(){}
     list<meta_data> candidates_; //subset score & subset's metadata
-
 };
 
 class hook_table: public index_table{

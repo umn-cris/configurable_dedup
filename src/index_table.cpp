@@ -10,6 +10,7 @@
 #include "index_table.h"
 
 list<meta_data> hook_table::SelectFIFO(const list<chunk>& features) {
+
     if (!g_if_flush) {
         cout<<"Yixun! add the flush logic!"<<endl;
     }
@@ -17,6 +18,7 @@ list<meta_data> hook_table::SelectFIFO(const list<chunk>& features) {
     list<meta_data> tmp_candidates;
     set<long> read_cans;
     bool jump_out = false;
+
 
     for( auto n:features){
         tmp_candidates = LookUp(n.ID());
@@ -187,6 +189,9 @@ list<meta_data> hook_table::PickCandidates(const list<chunk>& features) {
     //record the occurrence frequency of hooks' associated subsets
     for(auto n:features){
         hook_associate_subsets = LookUp(n.ID());
+        /*for (auto s:hook_associate_subsets) {
+            cout<<s.Name()<<" ";
+        }*/
         for (auto it:hook_associate_subsets) {
             if (it.IfCnr()) {
                 if (cnr_candidates_hit_num.find(it.Name())!=cnr_candidates_hit_num.end())
@@ -260,12 +265,19 @@ list<meta_data> hook_table::PickCandidates(const list<chunk>& features) {
 
 void hook_table::InsertFeatures(const chunk &cks, meta_data meta) {
         hook_entry* entry;
-        if (LookUp(cks.ID(),&entry)) {
-            entry->candidates_.push_back(meta);
-        } else {
+        if (!LookUp(cks.ID(),&entry)) {
             hook_entry tmp_entry;
             tmp_entry.candidates_.push_back(meta);
             cached_hooks_.emplace(cks.ID(),tmp_entry);
+        } else {
+            // check whether this feature has already get association with the subset
+            bool exist=false;
+            for(auto c:entry->candidates_){
+                if (c.Name() == meta.Name()) exist= true;
+            }
+            // only if not associated already, push back the subset
+            if (!exist)
+                entry->candidates_.push_back(meta);
         }
 }
 

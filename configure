@@ -3,11 +3,11 @@ if_exact false
 if_hybrid false
 
 
-only_recipe false
-only_cnr true
+only_recipe true
+only_cnr false
 
 #subset selection policy engine for configure dedup, level, sparse, fifo, sort
-selection_policy sort
+selection_policy sparse
 
 #unit subset/cache
 cache_size 1024
@@ -30,16 +30,20 @@ container_size 1024
 #unit chunks/window
 window_size 1024
 
-#unit subset
-IO_cap 10000
+#unit subset low=6 high=20
+IO_cap 60
 
-#sample ratio
+#sampling method: position chunkID
+sampling_method position
+
+#sample ratio  low=1/8  high=1/256  (we only take the last two hex bit for chunkID based sampling, 256 is the maximal)
 bit_num1 7
 bit_num2 7
 bit_num3 7
 bit_num4 0
-random_pick_ratio 41
-if_min_hook_sampling true
+chunkID_pick_ratio 256
+random_pick_ratio 8
+if_min_hook_sampling false
 min_hook_number 41
 uniform_for_cnr false
 
@@ -54,7 +58,7 @@ debug_output true
 recipe_version_bound 1000
 
 #dedup_trace_dir ./gcc_out_incre_5/
-dedup_trace_dir ./gcc_out_full/
+dedup_trace_dir ./trace/
 trace_summary_file summary.txt
 recipe_file recipe
 

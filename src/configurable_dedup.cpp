@@ -16,19 +16,43 @@ set<chunk,ckComp> min_hooks;
 
 bool configurable_dedup::Append2Containers(container* cnr) {
     //cnr->SetSequenceNumber(sequence_number_);
-    cnr->SetScore(CnrScore());
     if (!g_only_recipe) {
+        cnr->SetScore(CnrScore());
+        cnr->IndicateCnr();
         containers_.push_back(*cnr);
+
+        //sample hooks
+        auto m = cnr->chunks_.begin();
+        while(m!=cnr->chunks_.end()){
+            if (IfFeature(*m)) {
+                hooks_.InsertFeatures(*m, cnr->Meta());
+            }
+            m++;
+        }
     }
+
+    // reset will increase the meta.name by 1
     cnr->reset();
     return true;
 }
 
-bool configurable_dedup::Append2Recipes(list<recipe>* segments) {
-    for(auto n:*segments){
-        n.IndicateRecipe();
-        recipes_.push_back(n);
+bool configurable_dedup::Append2Recipes(recipe* n) {
+    if (!g_only_cnr) {
+        n->IndicateRecipe();
+        recipes_.push_back(*n);
+
+        //sample hooks for the finished recipe
+        auto m = n->chunks_.begin();
+        while(m!=n->chunks_.end()){
+            if (IfFeature(*m)) {
+                hooks_.InsertFeatures(*m, n->Meta());
+            }
+            m++;
+        }
     }
+
+    // reset will increase the meta.name by 1
+    n->reset();
     return true;
 }
 
@@ -43,7 +67,9 @@ bool configurable_dedup::IsBoundary(chunk ck, long num) {
 void configurable_dedup::Load2cache(const list<chunk>& features) {
     // we have multiple hook hit, each hook associates with several metagroups.
     // meta group selection problem: which hook's which meta group to pick
-    list<meta_data> candidates = hooks_.SimplePickCandidates(features);
+
+    //list<meta_data> candidates = hooks_.SimplePickCandidates(features);
+    list<meta_data> candidates = hooks_.PickCandidates(features);
 
     if(candidates.empty()) return;
     long cap=g_IO_cap;
@@ -254,7 +280,7 @@ void configurable_dedup::DoDedup(){
         while (trace_ptr->HasNext()){
 
             long window_size=g_window_size;
-            recipe window_;
+            subset window_;
             window_.SetSequenceNumber(++sequence_number_);
 
 
@@ -277,7 +303,7 @@ void configurable_dedup::DoDedup(){
 
             //a batch of chunks will be first cut to multiple segments, each segment is a small set of chunks
             //segment is the basic unit to execute hook/sample/load cnr or recipe
-            list<chunk>::iterator m = window_.chunks_.begin();
+            auto m = window_.chunks_.begin();
                 /*1.hook hit*/
                 while (m!=window_.chunks_.end()){
                     if(hooks_.LookUp(*m)){
@@ -310,6 +336,7 @@ void configurable_dedup::DoDedup(){
                         if(!current_cnr->AppendChunk(*m)){
                             Append2Containers(current_cnr);
                             current_cnr->AppendChunk(*m);
+                            //if finish a container, will sample hooks in the container
                         }
                         // code for min sampling
                       /* if(g_if_min_hook_sampling){
@@ -325,26 +352,16 @@ void configurable_dedup::DoDedup(){
                            }
                        }*/
                    }
+                   //load to current recipe, no matter it is deduped or not
+                if(!current_recipe->AppendChunk(*m)){
+                    Append2Recipes(current_recipe);
+                    current_recipe->AppendChunk(*m);
+                }
                    m++;
-                }
-            //Append2Containers(current_cnr);
-            recipes_.push_back(window_);
-
-
-            //sample hook from window
-            m = window_.chunks_.begin();
-            while(m!=window_.chunks_.end()) {
-                //check if should sample as hook
-                if (IfFeature(*m)) {
-                    if (!g_only_cnr)
-                        window_.IndicateRecipe();
-                    else
-                        window_.IndicateCnr();
-                    hooks_.InsertFeatures(*m, window_.Meta());
-                    //recipe_hook_num++;
-                    //or cnr_hook_num++;
-                }
             }
+
+
+
 
             // every window pick a fix number of min chunk as hook
             /*if(g_if_min_hook_sampling){
@@ -364,6 +381,7 @@ void configurable_dedup::DoDedup(){
                 out_window_deduprate<<t_win_num_<<" "<<current_window_deduprate<<"\n";
             }
         }
+
         //for(auto n:recipes_) cout<<n.Name()<<" "<<n.Score()<<" "<<n.SequenceNumber()<<endl;
 
 //        hooks_.PrintHookInfo();
@@ -373,6 +391,7 @@ void configurable_dedup::DoDedup(){
             cout << "print recipe" << endl;
             for (auto n:recipes_)cout << n.Name() << " " << n.SequenceNumber() << endl;
         }*/
+
          IOloads = cnr_IOloads+recipe_IOloads;
          long size=hooks_.cached_hooks_.size();
          //for(auto n:hooks_.map_)size += n.second.candidates_.size();
