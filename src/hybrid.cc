@@ -506,16 +506,10 @@ void HybridDedup::DoDedup() {
 		long last_recipe_hook_num = 0;
 		long cnr_hook_num = 0;
 
-    string trace_sum, trace_name, trace_line;
-    ifstream TraceSumFile;
-    trace_sum = g_dedup_trace_dir + g_trace_summary_file;
-    TraceSumFile.open(trace_sum);
-    if (TraceSumFile.fail()) {
-        cerr << "open "<< trace_sum <<  "failed!\n";
-        exit(1);
-    }
+    vector<string> all_files_ = listFiles(g_dedup_trace_dir, true);
 
-    while(getline(TraceSumFile, trace_line)) {
+    for(auto n:all_files_){
+        cout<<n<<endl;
         long cache_hit=0, cache_miss=0, hook_hit=0;
         long last_IOloads = IOloads;
         long last_cnr_IOloads = cnr_IOloads;
@@ -525,12 +519,8 @@ void HybridDedup::DoDedup() {
 				long cur_win = 0;
 
 
-        stringstream ss(trace_line);
-				cur_version_++;
-        getline(ss, trace_name, ' ');
-        string trace_path;
-        trace_path = g_dedup_trace_dir + trace_name;
-        TraceReader *trace_ptr = new TraceReader(trace_path);
+
+        TraceReader *trace_ptr = new TraceReader(n);
         while (trace_ptr->HasNext()) {
             long window_size=g_window_size;
             vector<chunk> window_;
