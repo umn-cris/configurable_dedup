@@ -129,27 +129,14 @@ public:
 };
 
 class subset{
-private:
-    meta_data meta_;
+
 public:
+    meta_data meta_;
     list<chunk> chunks_;
     subset(){}
     ~subset(){}
     subset(long chunk_num,long name, string location){
         meta_.Set(chunk_num, name, location);
-    }
-
-    bool AppendChunk(chunk& ck){
-        // recipe container share same size
-        if(chunks_.size()<g_container_size){
-            //ck.SetCnrName(Name());
-            ck.SetLocation(meta_.Name());
-            chunks_.push_back(ck);
-            meta_.NumInc();
-            return true;
-        } else{
-            return false;
-        }
     }
 
     long Name(){
@@ -200,6 +187,19 @@ public:
         subset(chunk_num, name, location);
     }
     ~container(){}
+
+    bool AppendChunk(chunk& ck){
+        // recipe container share same size
+        if(chunks_.size()<g_container_size){
+            //ck.SetCnrName(Name());
+            ck.SetLocation(meta_.Name());
+            chunks_.push_back(ck);
+            meta_.NumInc();
+            return true;
+        } else{
+            return false;
+        }
+    }
 };
 
 class recipe: public subset{
@@ -212,8 +212,44 @@ public:
         subset( chunk_num, name, location);
     }
     ~recipe(){}
+
+    bool AppendChunk(chunk& ck){
+        // recipe & container share same size
+        if(chunks_.size()<g_container_size){
+            //ck.SetCnrName(Name());
+            ck.SetLocation(meta_.Name());
+            chunks_.push_back(ck);
+            meta_.NumInc();
+            return true;
+        } else{
+            return false;
+        }
+    }
 };
 
+class dedupe_window: public subset{
+public:
+    dedupe_window(){
+            IndicateRecipe();
+    }
+    dedupe_window(long chunk_num,long name, string location){
+        IndicateRecipe();
+        subset(chunk_num, name, location);
+    }
+    ~dedupe_window(){}
+
+    bool AppendChunk(chunk& ck){
+        // dedupe window may have size different from cnr
+        if(chunks_.size()<g_window_size){
+            //ck.SetCnrName(Name());
+            chunks_.push_back(ck);
+            meta_.NumInc();
+            return true;
+        } else{
+            return false;
+        }
+    }
+};
 
 
 #endif //DEDUP_REWRITE_SUBSET_H

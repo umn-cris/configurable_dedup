@@ -267,7 +267,7 @@ void configurable_dedup::DoDedup(){
         while (trace_ptr->HasNext()){
 
             long window_size=g_window_size;
-            subset window_;
+            dedupe_window window_;
             window_.SetSequenceNumber(++sequence_number_);
 
 
@@ -282,7 +282,7 @@ void configurable_dedup::DoDedup(){
                 window_size--;
                 window_.AppendChunk(ck);
             }
-
+            cout<<window_.SequenceNumber()<<" "<<window_.GetChunkNum()<<endl;
             cur_win++;
             t_win_num_++;
             //CDSegmenting(window_,current_recipe,segments_);
