@@ -270,6 +270,7 @@ void configurable_dedup::DoDedup(){
         getline(ss, trace_name, ' ');
         string trace_path;
         trace_path = g_dedup_trace_dir + trace_name;
+        cout<<trace_path<<endl;
         TraceReader trace_ptr(trace_path);
         if(g_print_window_deduprate){
             string outfile = trace_name+"window_deduprate";
