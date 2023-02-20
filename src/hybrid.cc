@@ -506,10 +506,16 @@ void HybridDedup::DoDedup() {
 		long last_recipe_hook_num = 0;
 		long cnr_hook_num = 0;
 
-    vector<string> all_files_ = listFiles(g_dedup_trace_dir, true);
+    string trace_sum, trace_name, trace_line;
+    ifstream TraceSumFile;
+    trace_sum = g_dedup_trace_dir + g_trace_summary_file;
+    TraceSumFile.open(trace_sum);
+    if (TraceSumFile.fail()) {
+        cerr << "open "<< trace_sum <<  "failed!\n";
+        exit(1);
+    }
 
-    for(auto n:all_files_){
-        cout<<n<<endl;
+    while(getline(TraceSumFile, trace_line)) {
         long cache_hit=0, cache_miss=0, hook_hit=0;
         long last_IOloads = IOloads;
         long last_cnr_IOloads = cnr_IOloads;
@@ -520,15 +526,21 @@ void HybridDedup::DoDedup() {
 
 
 
-        TraceReader *trace_ptr = new TraceReader(n);
-        while (trace_ptr->HasNext()) {
+        stringstream ss(trace_line);
+        getline(ss, trace_name, ' ');
+        string trace_path;
+        trace_path = g_dedup_trace_dir + trace_name;
+        TraceReader trace_ptr(trace_path);
+
+
+        while (trace_ptr.HasNext()) {
             long window_size=g_window_size;
             vector<chunk> window_;
             sequence_number_++;
 
-            while(trace_ptr->HasNext() && window_size>0)
+            while(trace_ptr.HasNext() && window_size>0)
             {
-                chunk ck = trace_ptr->Next();
+                chunk ck = trace_ptr.Next();
                 total_chunks_++;
                 window_size--;
                 window_.push_back(ck);

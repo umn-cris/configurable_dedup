@@ -244,15 +244,20 @@ void configurable_dedup::DoDedup(){
     long t_win_num_ = 0;
     long recipe_hook_num = 0;
     long cnr_hook_num = 0;
+    long cache_hit=0, cache_miss=0, hook_hit=0;
     ofstream out_window_deduprate;
 
+    string trace_sum, trace_name, trace_line;
+    ifstream TraceSumFile;
+    trace_sum = g_dedup_trace_dir + g_trace_summary_file;
+    TraceSumFile.open(trace_sum);
+    if (TraceSumFile.fail()) {
+        cerr << "open "<< trace_sum <<  "failed!\n";
+        exit(1);
+    }
+    int version_num=0;
+    while(getline(TraceSumFile, trace_line)) {
 
-    vector<string> all_files_ = listFiles(g_dedup_trace_dir, true);
-
-    for(auto n:all_files_){
-        cout<<n<<endl;
-
-        long cache_hit=0, cache_miss=0, hook_hit=0;
         long last_IOloads = IOloads;
         long last_cnr_IOloads = cnr_IOloads;
         long last_recipe_IOloads = recipe_IOloads;
@@ -261,10 +266,20 @@ void configurable_dedup::DoDedup(){
         long cur_win = 0;
 
 
-        TraceReader *trace_ptr = new TraceReader(n);
+        stringstream ss(trace_line);
+        getline(ss, trace_name, ' ');
+        string trace_path;
+        trace_path = g_dedup_trace_dir + trace_name;
+        TraceReader trace_ptr(trace_path);
+        if(g_print_window_deduprate){
+            string outfile = trace_name+"window_deduprate";
+            out_window_deduprate.open(outfile,ios::out);
+        }
 
+        cout<<"version:"<<version_num++<<"  -- "<<trace_path<<endl;
+        cout<<"avg # of recipes:"<<recipes_.size()/version_num<<endl;
 
-        while (trace_ptr->HasNext()){
+        while (trace_ptr.HasNext()){
 
             long window_size=g_window_size;
             dedupe_window window_;
@@ -275,9 +290,9 @@ void configurable_dedup::DoDedup(){
             long last_window_stored_chunks = stored_chunks_;
 
             //batch deduplication, each time grab a window size of chunks to do dedupe
-            while(trace_ptr->HasNext() && window_size>0)
+            while(trace_ptr.HasNext() && window_size>0)
             {
-                chunk ck = trace_ptr->Next();
+                chunk ck = trace_ptr.Next();
                 total_chunks_++;
                 window_size--;
                 window_.AppendChunk(ck);
