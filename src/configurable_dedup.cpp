@@ -255,7 +255,7 @@ void configurable_dedup::DoDedup(){
         cerr << "open "<< trace_sum <<  "failed!\n";
         exit(1);
     }
-    int version_num=0;
+
     while(getline(TraceSumFile, trace_line)) {
 
         long last_IOloads = IOloads;
@@ -276,8 +276,7 @@ void configurable_dedup::DoDedup(){
             out_window_deduprate.open(outfile,ios::out);
         }
 
-        cout<<"version:"<<version_num++<<"  -- "<<trace_path<<endl;
-        cout<<"avg # of recipes:"<<recipes_.size()/version_num<<endl;
+        cout<<trace_path<<endl;
 
         while (trace_ptr.HasNext()){
 
@@ -335,11 +334,13 @@ void configurable_dedup::DoDedup(){
                    else{
                         cache_miss++;
                         stored_chunks_++;
-                        if(!current_cnr->AppendChunk(*m)){
-                            Append2Containers(current_cnr);
-                            current_cnr->AppendChunk(*m);
-                            //if finish a container, will sample hooks in the container
-                        }
+                       if (g_only_cnr){
+                           if(!current_cnr->AppendChunk(*m)){
+                               Append2Containers(current_cnr);
+                               current_cnr->AppendChunk(*m);
+                               //if finish a container, will sample hooks in the container
+                           }
+                       }
                         // code for min sampling
                       /* if(g_if_min_hook_sampling){
                            if(min_hooks.size()<g_min_hook_number) {
@@ -355,10 +356,13 @@ void configurable_dedup::DoDedup(){
                        }*/
                    }
                    //load to current recipe, no matter it is deduped or not
-                if(!current_recipe->AppendChunk(*m)){
-                    Append2Recipes(current_recipe);
-                    current_recipe->AppendChunk(*m);
+                if (g_only_recipe){
+                    if(!current_recipe->AppendChunk(*m)){
+                        Append2Recipes(current_recipe);
+                        current_recipe->AppendChunk(*m);
+                    }
                 }
+
                    m++;
             }
 
