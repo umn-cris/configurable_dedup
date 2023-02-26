@@ -49,7 +49,7 @@ bool configurable_dedup::Append2Recipes(recipe* n) {
             cerr << "open "<< recipe_path <<  "failed!\n";
             exit(1);
         }
-        cout << "Writing to the "<<recipe_path<< endl;
+
         auto c = n->chunks_.begin();
         while(c!=n->chunks_.end()){
             outfile << c->ID() << " " << c->GetLocation()<< " ";
