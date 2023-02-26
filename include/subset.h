@@ -66,14 +66,12 @@ public:
 
 class chunk{
     string chunk_id_;
-    long size_=0;
     long location_;
     //long cnr_name_=-1;
     //long recipe_name_=-1;
     bool if_cnr_=false;
 public:
     chunk(){
-        size_=0;
         location_=0;
         //cnr_name_=-1;
         //recipe_name_=-1;
@@ -81,7 +79,6 @@ public:
     }
     chunk(const chunk &value){
         chunk_id_=value.chunk_id_;
-        size_=value.size_;
         location_=value.location_;
         //cnr_name_=value.cnr_name_;
         //recipe_name_=value.recipe_name_;
@@ -91,9 +88,7 @@ public:
     void SetID(string id){
         chunk_id_=id;
     }
-    void SetSize(long size){
-        size_=size;
-    }
+
     void SetLocation(long position){
         location_=position;
     }
@@ -216,8 +211,6 @@ public:
     bool AppendChunk(chunk& ck){
         // recipe & container share same size
         if(chunks_.size()<g_container_size){
-            //ck.SetCnrName(Name());
-            ck.SetLocation(meta_.Name());
             chunks_.push_back(ck);
             meta_.NumInc();
             return true;

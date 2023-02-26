@@ -18,7 +18,7 @@ long g_IO_cap=0;
 long g_BFcache_size=0;
 string g_dedup_trace_dir;
 string g_trace_summary_file;
-string g_recipe_file;
+string g_recipe_path;
 string g_sampling_method;
 long g_bit_num1=0;
 long g_bit_num2=0;
@@ -197,8 +197,8 @@ int Parse(string cfgfile){
             case hash_("dedup"):
                 g_dedup = (value=="true");
                 break;
-            case hash_("recipe_file"):
-                g_recipe_file = value;
+            case hash_("recipe_path"):
+                g_recipe_path = value;
                 break;
             default:
                 cout<<"unknown cfg: "<<key<<endl;

@@ -46,7 +46,7 @@ list<meta_data> hook_table::SelectFIFO(const list<chunk>& features) {
 			if (g_only_cnr) {
 				candidates.push_back(containers_[it].Meta());
 			} else if (g_only_recipe) {
-				candidates.push_back(recipes_[it].Meta());
+				candidates.push_back(recipes_meta[it]);
 			}
 		}
 
@@ -145,7 +145,7 @@ list<meta_data> hook_table::SelectSparse(unordered_map<long, set<string>> cds_ma
 			if (g_only_cnr) {
 				selected_subsets.push_back(containers_[cds_selected[i]].Meta());
 			} else if (g_only_recipe) {
-				selected_subsets.push_back(recipes_[cds_selected[i]].Meta());
+				selected_subsets.push_back(recipes_meta[cds_selected[i]]);
 			}
 			cds_map.erase(cds_selected[i]);
 			selected_hooks.insert(top_set.begin(), top_set.end());
@@ -244,7 +244,7 @@ list<meta_data> hook_table::PickCandidates(const list<chunk>& features) {
 
     } else if (g_only_recipe) {
     	for (auto it:recipe_candidates_hit_num) {
-      	    recipe_cds_list.push_back(recipes_[it.first].Meta());
+      	    recipe_cds_list.push_back(recipes_meta[it.first]);
       	    recipe_cds_list.back().SetScore(it.second);
     	}
 			if (g_selection_policy == "fifo") {
@@ -287,12 +287,7 @@ void hook_table::EraseHookTable(chunk ck) {}
 
 bool lru_cache::Load(const meta_data value) {
     // if target subset is already loaded into cache, make it as the first subset in the lru list.
-    /*if(subsets_.find(value.Name())!=subsets_.end() && subsets_[value.Name()]->IfCnr() == value.IfCnr()){
-        lru_cache_.remove(value);
-        lru_cache_.push_front(value);
-        return;
-    }*/
-    for(auto n:lru_cache_){
+    /*for(auto n:lru_cache_){
         if(n.Name() == value.Name() && n.IfCnr() == value.IfCnr()) {
             lru_cache_.remove(value);
             lru_cache_.push_front(value);
@@ -304,21 +299,45 @@ bool lru_cache::Load(const meta_data value) {
     {
         Evict();
     }
-
+*/
 
     lru_cache_.push_front(value);
     if(value.IfCnr()){
         InsertChunks(containers_[value.Name()].chunks_, true);
         cnr_IOloads++;
     }else{
-        InsertChunks(recipes_[value.Name()].chunks_, false);
+        list<chunk> cks;
+
+        ifstream infile;
+        string recipe_name = g_recipe_path + to_string(value.Name());
+        infile.open(recipe_name);
+        if (infile.fail()) {
+            cerr << "open "<< recipe_name <<  "failed!\n";
+            exit(1);
+        }
+        string s;
+        while( infile >> s )
+        {
+            chunk ck;
+            ck.SetID(s);
+            infile >> s;
+            ck.SetLocation(stol(s));
+            cks.push_back(ck);
+        }
+
+        infile.close();
+
+
+
+        InsertChunks(cks, false);
+
         recipe_IOloads++;
     }
     return true;
 
 }
 
-void lru_cache::Evict() {
+/*void lru_cache::Evict() {
     meta_data tmp = lru_cache_.back();
     if (tmp.IfCnr()) {
         for (auto m:containers_[tmp.Name()].chunks_) {
@@ -331,7 +350,7 @@ void lru_cache::Evict() {
         }
         lru_cache_.pop_back();
     }
-}
+}*/
 
 void lru_cache::Flush() {
     cached_chunks_.clear();

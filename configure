@@ -31,7 +31,7 @@ container_size 1024
 window_size 1024
 
 #unit subset low=6 high=20
-IO_cap 60
+IO_cap 20
 
 #sampling method: position chunkID
 sampling_method position
@@ -59,8 +59,8 @@ recipe_version_bound 1000
 
 #dedup_trace_dir ./gcc_out_incre_5/
 dedup_trace_dir ./trace/
-trace_summary_file summary.txt
-recipe_file recipe
+trace_summary_file sum
+recipe_path ./recipe/
 
 cap_adaptive false
 

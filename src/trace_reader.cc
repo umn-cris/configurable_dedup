@@ -46,7 +46,7 @@ chunk TraceReader::Next() {
 
     chunk ck;
     ck.SetID(result[0]);
-    ck.SetSize(g_chunk_size);
+
     return ck;
 }
 

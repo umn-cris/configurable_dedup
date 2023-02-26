@@ -6,7 +6,8 @@
 #include "configurable_dedup.h"
 
 vector<container> containers_;
-vector<recipe> recipes_;
+vector<meta_data> recipes_meta;
+
 struct ckComp{
     bool operator()(const chunk &a, const chunk &b){
         return a.ID()>b.ID(); // from big to small
@@ -39,7 +40,23 @@ bool configurable_dedup::Append2Containers(container* cnr) {
 bool configurable_dedup::Append2Recipes(recipe* n) {
     if (!g_only_cnr) {
         n->IndicateRecipe();
-        recipes_.push_back(*n);
+        recipes_meta.push_back(n->meta_);
+
+        ofstream outfile;
+        string recipe_path = g_recipe_path + to_string(n->Meta().Name());
+        outfile.open(recipe_path);
+        if (outfile.fail()) {
+            cerr << "open "<< recipe_path <<  "failed!\n";
+            exit(1);
+        }
+        cout << "Writing to the "<<recipe_path<< endl;
+        auto c = n->chunks_.begin();
+        while(c!=n->chunks_.end()){
+            outfile << c->ID() << " " << c->GetLocation()<< " ";
+            c++;
+        }
+        outfile.close();
+
 
         //sample hooks for the finished recipe
         auto m = n->chunks_.begin();
@@ -100,7 +117,7 @@ void configurable_dedup::CDSegmenting( vector<chunk>& window, recipe* re,  list<
 
 bool compareFunction (subset a, subset b) {return a.Score()>b.Score();}
 
-void configurable_dedup::CheckDW(int backup_version){
+/*void configurable_dedup::CheckDW(int backup_version){
     container* current_cnr = new container(0,0,"container");
 
     // randomly select a DW to check.
@@ -235,7 +252,7 @@ void configurable_dedup::CheckDW(int backup_version){
         }
     }
 
-}
+}*/
 
 void configurable_dedup::DoDedup(){
     container* current_cnr = new container(0,0,"container");
@@ -270,14 +287,12 @@ void configurable_dedup::DoDedup(){
         getline(ss, trace_name, ' ');
         string trace_path;
         trace_path = g_dedup_trace_dir + trace_name;
-        cout<<trace_path<<endl;
         TraceReader trace_ptr(trace_path);
         if(g_print_window_deduprate){
             string outfile = trace_name+"window_deduprate";
             out_window_deduprate.open(outfile,ios::out);
         }
 
-        cout<<trace_path<<endl;
 
         while (trace_ptr.HasNext()){
 
@@ -335,12 +350,10 @@ void configurable_dedup::DoDedup(){
                    else{
                         cache_miss++;
                         stored_chunks_++;
-                       if (g_only_cnr){
-                           if(!current_cnr->AppendChunk(*m)){
-                               Append2Containers(current_cnr);
-                               current_cnr->AppendChunk(*m);
-                               //if finish a container, will sample hooks in the container
-                           }
+                       if(!current_cnr->AppendChunk(*m)){
+                           Append2Containers(current_cnr);
+                           current_cnr->AppendChunk(*m);
+                           //if finish a container, will sample hooks in the container
                        }
                         // code for min sampling
                       /* if(g_if_min_hook_sampling){
@@ -458,17 +471,4 @@ void configurable_dedup::DoDedup(){
     //out_recipe.close();
 }
 
-void configurable_dedup::ReStore() {
-    string recipe_name, recipe_line;
-    ifstream RecipeFile;
-    recipe_name =  g_recipe_file;
-    RecipeFile.open(recipe_name);
-    if (RecipeFile.fail()) {
-        cerr << "open "<< recipe_name <<  "failed!\n";
-        exit(1);
-    }
 
-    while(getline(RecipeFile, recipe_line)) {
-        // in motivation experiments, we do not consider cache, just check the fragmentation
-    }
-}

@@ -10,7 +10,7 @@
 #define CONFIGURABLE_DEDUP_INDEX_TABLE_H
 
 extern vector<container> containers_;
-extern vector<recipe> recipes_;
+extern vector<meta_data> recipes_meta;
 
 class index_table{
 public:
