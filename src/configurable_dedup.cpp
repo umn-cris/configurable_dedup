@@ -448,7 +448,7 @@ void configurable_dedup::DoDedup(){
         	cout<<"current recipe_IO:"<<current_recipe_IOloads<<" overall recipe_IO:"<<recipe_IOloads<<endl;
         	cout<<"current IOloads:"<<current_IOloads<<" overall IOloads:"<<IOloads<<endl;
         	cout<<"current deduprate:"<<current_deduprate<<" overall deduprate:"<<overall_deduprate<<endl<<endl;
-            cout<<"avg # cnr reads to restore a recipe:"<<total_cnr_reads/(recipes_meta.size()*1.0)<<endl;
+            if (g_only_recipe) cout<<"avg # cnr reads to restore a recipe:"<<total_cnr_reads/(recipes_meta.size()*1.0)<<endl;
         } else {
             cout<<g_dedup_engine<<" "<<g_selection_policy<<" "<<g_cache_size<<" "<<g_container_size<<" "<<g_window_size<<" "<<g_IO_cap<<" "<<cur_win<<" "<<t_win_num_<<" "
                 <<recipe_sample_ratio<<" "<<cnr_sample_ratio<<" "<<current_cnr_IOloads<<" "<<cnr_IOloads<<" "<<current_recipe_IOloads<<" "
