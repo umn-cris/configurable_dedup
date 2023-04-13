@@ -51,15 +51,13 @@ bool configurable_dedup::Append2Recipes(recipe* n) {
             exit(1);
         }
 
-        set<int> cnr_location;
+
         auto c = n->chunks_.begin();
         while(c!=n->chunks_.end()){
             outfile << c->ID() << " " << c->GetLocation()<< " ";
-            cnr_location.insert(c->GetLocation());
             c++;
         }
         outfile.close();
-        total_cnr_reads += cnr_location.size();
 
         //sample hooks for the finished recipe
         auto m = n->chunks_.begin();
@@ -345,11 +343,13 @@ void configurable_dedup::DoDedup(){
             /*3. dedup via lru_cache*/
                 // go over each chunk in the segment
 
+            set<int> cnr_location;
             m = window_.chunks_.begin();
             while(m!=window_.chunks_.end()) {
                 //cache hit
                    if(cache_.LookUp(*m)){
                         cache_hit++;
+                       cnr_location.insert(m->GetLocation());
                    }
                    // or store unique chunk
                    else{
@@ -385,6 +385,7 @@ void configurable_dedup::DoDedup(){
 
                    m++;
             }
+            total_cnr_reads += cnr_location.size();
 
 
 
@@ -448,7 +449,7 @@ void configurable_dedup::DoDedup(){
         	cout<<"current recipe_IO:"<<current_recipe_IOloads<<" overall recipe_IO:"<<recipe_IOloads<<endl;
         	cout<<"current IOloads:"<<current_IOloads<<" overall IOloads:"<<IOloads<<endl;
         	cout<<"current deduprate:"<<current_deduprate<<" overall deduprate:"<<overall_deduprate<<endl<<endl;
-            if (g_only_recipe) cout<<"avg # cnr reads to restore a recipe:"<<total_cnr_reads/(recipes_meta.size()*1.0)<<endl;
+            if (g_only_recipe) cout<<"avg # cnr reads to restore a recipe:"<<total_cnr_reads/(t_win_num_*1.0)<<endl;
         } else {
             cout<<g_dedup_engine<<" "<<g_selection_policy<<" "<<g_cache_size<<" "<<g_container_size<<" "<<g_window_size<<" "<<g_IO_cap<<" "<<cur_win<<" "<<t_win_num_<<" "
                 <<recipe_sample_ratio<<" "<<cnr_sample_ratio<<" "<<current_cnr_IOloads<<" "<<cnr_IOloads<<" "<<current_recipe_IOloads<<" "

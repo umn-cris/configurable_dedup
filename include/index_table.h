@@ -93,6 +93,7 @@ public:
         if(cached_chunks_.find(ck.ID())!=cached_chunks_.end()){
             //ck = map_[ck.ID()];
             ck.SetLocation(cached_chunks_[ck.ID()].GetLocation());
+
             return true;
         }
         else
