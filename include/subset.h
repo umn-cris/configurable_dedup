@@ -186,7 +186,6 @@ public:
     bool AppendChunk(chunk& ck){
         // recipe container share same size
         if(chunks_.size()<g_container_size){
-            //ck.SetCnrName(Name());
             ck.SetLocation(meta_.Name());
             chunks_.push_back(ck);
             meta_.NumInc();

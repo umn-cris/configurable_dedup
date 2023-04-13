@@ -31,7 +31,7 @@ container_size 1024
 window_size 1024
 
 #unit subset low=6 high=20
-IO_cap 20
+IO_cap 6
 
 #sampling method: position chunkID
 sampling_method position

@@ -7,6 +7,7 @@
 
 vector<container> containers_;
 vector<meta_data> recipes_meta;
+int total_cnr_reads = 0;
 
 struct ckComp{
     bool operator()(const chunk &a, const chunk &b){
@@ -46,17 +47,19 @@ bool configurable_dedup::Append2Recipes(recipe* n) {
         string recipe_path = g_recipe_path + to_string(n->Meta().Name());
         outfile.open(recipe_path);
         if (outfile.fail()) {
-            cerr << "open "<< recipe_path <<  "failed!\n";
+            cerr << "open "<< recipe_path <<  " failed!\n";
             exit(1);
         }
 
+        set<int> cnr_location;
         auto c = n->chunks_.begin();
         while(c!=n->chunks_.end()){
             outfile << c->ID() << " " << c->GetLocation()<< " ";
+            cnr_location.insert(c->GetLocation());
             c++;
         }
         outfile.close();
-
+        total_cnr_reads += cnr_location.size();
 
         //sample hooks for the finished recipe
         auto m = n->chunks_.begin();
@@ -273,6 +276,7 @@ void configurable_dedup::DoDedup(){
         exit(1);
     }
 
+
     while(getline(TraceSumFile, trace_line)) {
 
         long last_IOloads = IOloads;
@@ -292,6 +296,7 @@ void configurable_dedup::DoDedup(){
             string outfile = trace_name+"window_deduprate";
             out_window_deduprate.open(outfile,ios::out);
         }
+
 
 
         while (trace_ptr.HasNext()){
@@ -342,7 +347,7 @@ void configurable_dedup::DoDedup(){
 
             m = window_.chunks_.begin();
             while(m!=window_.chunks_.end()) {
-                   //cache hit
+                //cache hit
                    if(cache_.LookUp(*m)){
                         cache_hit++;
                    }
@@ -370,6 +375,7 @@ void configurable_dedup::DoDedup(){
                        }*/
                    }
                    //load to current recipe, no matter it is deduped or not
+
                 if (g_only_recipe){
                     if(!current_recipe->AppendChunk(*m)){
                         Append2Recipes(current_recipe);
@@ -442,6 +448,7 @@ void configurable_dedup::DoDedup(){
         	cout<<"current recipe_IO:"<<current_recipe_IOloads<<" overall recipe_IO:"<<recipe_IOloads<<endl;
         	cout<<"current IOloads:"<<current_IOloads<<" overall IOloads:"<<IOloads<<endl;
         	cout<<"current deduprate:"<<current_deduprate<<" overall deduprate:"<<overall_deduprate<<endl<<endl;
+            cout<<"avg # cnr reads to restore a recipe:"<<total_cnr_reads/(recipes_meta.size()*1.0)<<endl;
         } else {
             cout<<g_dedup_engine<<" "<<g_selection_policy<<" "<<g_cache_size<<" "<<g_container_size<<" "<<g_window_size<<" "<<g_IO_cap<<" "<<cur_win<<" "<<t_win_num_<<" "
                 <<recipe_sample_ratio<<" "<<cnr_sample_ratio<<" "<<current_cnr_IOloads<<" "<<cnr_IOloads<<" "<<current_recipe_IOloads<<" "
