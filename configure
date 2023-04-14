@@ -3,8 +3,8 @@ if_exact false
 if_hybrid false
 
 
-only_recipe true
-only_cnr false
+only_recipe false
+only_cnr true
 
 #subset selection policy engine for configure dedup, level, sparse, fifo, sort
 selection_policy sparse
@@ -31,7 +31,7 @@ container_size 1024
 window_size 1024
 
 #unit subset low=6 high=20
-IO_cap 6
+IO_cap 1
 
 #sampling method: position chunkID
 sampling_method position

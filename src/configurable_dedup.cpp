@@ -456,8 +456,8 @@ void configurable_dedup::DoDedup(){
         	cout<<"current recipe_IO:"<<current_recipe_IOloads<<" overall recipe_IO:"<<recipe_IOloads<<endl;
         	cout<<"current IOloads:"<<current_IOloads<<" overall IOloads:"<<IOloads<<endl;
         	cout<<"current deduprate:"<<current_deduprate<<" overall deduprate:"<<overall_deduprate<<endl<<endl;
+            cout<<"avg # cnrs ChunkID has in cache to dedupe a window:"<<total_cnr_reads_of_chunkID/(t_win_num_*1.0)<<endl;
             if (g_only_recipe) {
-                cout<<"avg # cnrs ChunkID has in cache to dedupe a window:"<<total_cnr_reads_of_chunkID/(t_win_num_*1.0)<<endl;
                 cout<<"avg # cnr reads to restore a window:"<<total_cnr_reads/(t_win_num_*1.0)<<endl;
             }
         } else {
