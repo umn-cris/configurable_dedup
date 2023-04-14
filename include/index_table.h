@@ -81,10 +81,11 @@ public:
 
 class lru_cache: public index_table{
 private:
+
+public:
     long capacity_ ;
     unordered_map<string,chunk> cached_chunks_;
     list<meta_data> lru_cache_ ;
-public:
     lru_cache() {
         capacity_= g_cache_size;
     }

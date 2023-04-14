@@ -8,6 +8,7 @@
 vector<container> containers_;
 vector<meta_data> recipes_meta;
 int total_cnr_reads = 0;
+int total_cnr_reads_of_chunkID = 0;
 
 struct ckComp{
     bool operator()(const chunk &a, const chunk &b){
@@ -339,6 +340,11 @@ void configurable_dedup::DoDedup(){
 
             Load2cache(hitted_hooks);
 
+            set<int> cnr_location_of_chunkID;
+            for(auto cc: cache_.cached_chunks_){
+                cnr_location_of_chunkID.insert(cc.second.GetLocation());
+            }
+            total_cnr_reads_of_chunkID+=cnr_location_of_chunkID.size();
 
             /*3. dedup via lru_cache*/
                 // go over each chunk in the segment
@@ -360,6 +366,7 @@ void configurable_dedup::DoDedup(){
                            current_cnr->AppendChunk(*m);
                            //if finish a container, will sample hooks in the container
                        }
+                       cnr_location.insert(m->GetLocation());
                         // code for min sampling
                       /* if(g_if_min_hook_sampling){
                            if(min_hooks.size()<g_min_hook_number) {
@@ -449,7 +456,10 @@ void configurable_dedup::DoDedup(){
         	cout<<"current recipe_IO:"<<current_recipe_IOloads<<" overall recipe_IO:"<<recipe_IOloads<<endl;
         	cout<<"current IOloads:"<<current_IOloads<<" overall IOloads:"<<IOloads<<endl;
         	cout<<"current deduprate:"<<current_deduprate<<" overall deduprate:"<<overall_deduprate<<endl<<endl;
-            if (g_only_recipe) cout<<"avg # cnr reads to restore a recipe:"<<total_cnr_reads/(t_win_num_*1.0)<<endl;
+            if (g_only_recipe) {
+                cout<<"avg # cnrs ChunkID has in cache to dedupe a window:"<<total_cnr_reads_of_chunkID/(t_win_num_*1.0)<<endl;
+                cout<<"avg # cnr reads to restore a window:"<<total_cnr_reads/(t_win_num_*1.0)<<endl;
+            }
         } else {
             cout<<g_dedup_engine<<" "<<g_selection_policy<<" "<<g_cache_size<<" "<<g_container_size<<" "<<g_window_size<<" "<<g_IO_cap<<" "<<cur_win<<" "<<t_win_num_<<" "
                 <<recipe_sample_ratio<<" "<<cnr_sample_ratio<<" "<<current_cnr_IOloads<<" "<<cnr_IOloads<<" "<<current_recipe_IOloads<<" "
